@@ -15,9 +15,9 @@
 - 支持通过配置文件动态配置模型参数
 
 ### 2. AI 服务接口
-- `LevelGenerationAiService`：关卡生成服务
-- `ResultReportAiService`：结果报告生成服务
-- 使用 `@SystemMessage` 和 `@UserMessage` 注解定义提示词
+- `LevelGenerationAiService`：关卡生成服务，使用简单的薪资参数
+- `ResultReportAiService`：结果报告生成服务，接收拼接好的用户消息
+- 使用 `@SystemMessage` 引入提示词文件，`@UserMessage` 接收业务层拼接的消息
 
 ### 3. 服务实现类集成
 - `LevelServiceImpl`：集成关卡生成 AI 服务，包含降级处理
@@ -118,14 +118,19 @@ mvn test -Dtest=AiServiceTest
    - 不要将 API Key 提交到代码仓库
 
 2. **模型选择**：
-   - 当前使用 `qwen-max` 模型以获得最佳效果
-   - 可根据成本考虑调整为 `qwen-turbo` 或其他模型
+   - 当前使用 `qwen-plus` 模型平衡效果和成本
+   - 可根据需求调整为 `qwen-max`（更好效果）或 `qwen-turbo`（更低成本）
 
-3. **错误处理**：
+3. **消息拼接**：
+   - `@UserMessage` 注解不支持多参数模板
+   - 在业务层使用 Java 模板字符串 (`String.format("""...""")`) 拼接复杂消息
+   - 这样可以更灵活地控制消息格式和内容
+
+4. **错误处理**：
    - 所有 AI 调用都有降级机制
    - 日志记录详细的错误信息便于调试
 
-4. **性能优化**：
+5. **性能优化**：
    - AI 调用可能较慢，建议在前端添加加载提示
    - 考虑添加缓存机制减少重复调用
 

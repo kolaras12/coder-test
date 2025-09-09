@@ -64,14 +64,31 @@ public class UserLevelServiceImpl extends ServiceImpl<UserLevelMapper, UserLevel
             // 1. 解析关卡的正确答案
             List<String> trueOptions = extractTrueOptions(level.getOptions());
             
-            // 2. 调用AI生成详细的结果报告
-            ResultReportResponse aiResponse = resultReportAiService.generateResultReport(
+            // 2. 拼接用户消息并调用AI生成详细的结果报告
+            String userMessage = String.format("""
+                ### 关卡名称
+                %s
+                
+                ## 关卡的需求描述
+                %s
+                
+                ## 用户选择的选项
+                %s
+                
+                ### 本关卡的正确选项
+                %s
+                
+                ### 用户当前的薪资
+                %d
+                """, 
                 level.getLevelName(),
                 level.getLevelDesc(),
                 JSONUtil.toJsonStr(userOptions),
                 JSONUtil.toJsonStr(trueOptions),
                 user.getSalary()
             );
+            
+            ResultReportResponse aiResponse = resultReportAiService.generateResultReport(userMessage);
             
             // 3. 将AI响应转换为UserLevel实体
             UserLevel userLevel = new UserLevel();

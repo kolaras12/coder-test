@@ -58,16 +58,33 @@ public class AiServiceTest {
         try {
             log.info("开始测试结果报告生成服务...");
             
-            // 模拟测试数据
+            // 模拟测试数据并拼接用户消息
             String levelName = "测试关卡";
             String levelDesc = "这是一个测试关卡描述";
             String userOptions = "[\"选项1\", \"选项2\"]";
             String trueOptions = "[\"选项1\", \"选项3\"]";
             Integer salary = 10000;
             
-            ResultReportResponse response = resultReportAiService.generateResultReport(
+            String userMessage = String.format("""
+                ### 关卡名称
+                %s
+                
+                ## 关卡的需求描述
+                %s
+                
+                ## 用户选择的选项
+                %s
+                
+                ### 本关卡的正确选项
+                %s
+                
+                ### 用户当前的薪资
+                %d
+                """, 
                 levelName, levelDesc, userOptions, trueOptions, salary
             );
+            
+            ResultReportResponse response = resultReportAiService.generateResultReport(userMessage);
             
             log.info("结果报告生成成功:");
             log.info("得分: {}", response.getScore());
