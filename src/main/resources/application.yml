@@ -1,6 +1,8 @@
 spring:
   application:
     name: coder-test-backend
+  profiles:
+    active: local
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/coder-test?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
@@ -15,21 +17,27 @@ server:
     context-path: /api
 mybatis-plus:
   configuration:
-    # MyBatis ??
-    map-underscore-to-camel-case: true
+    # MyBatis
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
-      # ????
       logic-delete-field: isDelete
-# springdoc-openapi????
+# springdoc-openapi
 springdoc:
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      # ????????????
       packages-to-scan: com.yupi.codertestbackend.controller
-# knife4j???????????????
+# knife4j
 knife4j:
   enable: true
   setting:
     language: zh_cn
+# LangChain4j AI配置
+langchain4j:
+  dashscope:
+    api-key: ${DASHSCOPE_API_KEY:your-api-key-here}
+    model-name: qwen-turbo
+    temperature: 0.7
+    timeout: 60s

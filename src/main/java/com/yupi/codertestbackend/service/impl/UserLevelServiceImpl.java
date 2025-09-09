@@ -5,6 +5,8 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yupi.codertestbackend.mapper.UserLevelMapper;
+import com.yupi.codertestbackend.model.dto.ai.LevelOption;
+import com.yupi.codertestbackend.model.dto.ai.ResultReportResponse;
 import com.yupi.codertestbackend.model.dto.level.SubmitAnswerRequest;
 import com.yupi.codertestbackend.model.entity.Level;
 import com.yupi.codertestbackend.model.entity.User;
@@ -12,6 +14,7 @@ import com.yupi.codertestbackend.model.entity.UserLevel;
 import com.yupi.codertestbackend.service.LevelService;
 import com.yupi.codertestbackend.service.UserLevelService;
 import com.yupi.codertestbackend.service.UserService;
+import com.yupi.codertestbackend.service.ai.ResultReportAiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +33,9 @@ public class UserLevelServiceImpl extends ServiceImpl<UserLevelMapper, UserLevel
 
     @Resource
     private UserService userService;
+    
+    @Resource
+    private ResultReportAiService resultReportAiService;
 
     @Override
     public UserLevel submitAnswer(SubmitAnswerRequest submitAnswerRequest, String userId) {
@@ -52,33 +58,97 @@ public class UserLevelServiceImpl extends ServiceImpl<UserLevelMapper, UserLevel
             throw new RuntimeException("用户不存在");
         }
 
-        // TODO: 这里需要调用AI来生成结果报告
-        // 1. 解析关卡的正确答案
-        // 2. 对比用户选择的答案
-        // 3. 调用AI生成详细的结果报告
-        // 4. 更新用户薪资
-        
         log.info("用户 {} 提交关卡 {} 的答案：{}", userId, levelId, userOptions);
         
-        // 临时生成示例结果（实际需要AI生成）
+        try {
+            // 1. 解析关卡的正确答案
+            List<String> trueOptions = extractTrueOptions(level.getOptions());
+            
+            // 2. 调用AI生成详细的结果报告
+            ResultReportResponse aiResponse = resultReportAiService.generateResultReport(
+                level.getLevelName(),
+                level.getLevelDesc(),
+                JSONUtil.toJsonStr(userOptions),
+                JSONUtil.toJsonStr(trueOptions),
+                user.getSalary()
+            );
+            
+            // 3. 将AI响应转换为UserLevel实体
+            UserLevel userLevel = new UserLevel();
+            userLevel.setUserId(userId);
+            userLevel.setLevelId(levelId);
+            userLevel.setUserOptions(JSONUtil.toJsonStr(userOptions));
+            userLevel.setScore(aiResponse.getScore());
+            userLevel.setComment(aiResponse.getComment());
+            userLevel.setSalaryChange(aiResponse.getSalaryChange());
+            userLevel.setSuggest(aiResponse.getSuggest());
+            userLevel.setReason(aiResponse.getReason());
+            userLevel.setTrueOptions(JSONUtil.toJsonStr(aiResponse.getTrueOptions()));
+            userLevel.setStandardAnswer(aiResponse.getStandardAnswer());
+
+            // 4. 保存结果
+            boolean saveResult = this.save(userLevel);
+            if (!saveResult) {
+                throw new RuntimeException("保存用户关卡结果失败");
+            }
+
+            // 5. 更新用户薪资
+            boolean updateResult = userService.updateUserSalary(userId, userLevel.getSalaryChange());
+            if (!updateResult) {
+                log.warn("更新用户薪资失败，用户ID：{}，薪资变化：{}", userId, userLevel.getSalaryChange());
+            }
+
+            log.info("用户 {} 完成关卡 {}，得分：{}，薪资变化：{}", userId, levelId, 
+                    userLevel.getScore(), userLevel.getSalaryChange());
+            
+            return userLevel;
+            
+        } catch (Exception e) {
+            log.error("AI生成结果报告失败，用户ID：{}，关卡ID：{}，错误信息：{}", 
+                    userId, levelId, e.getMessage(), e);
+            
+            // 降级处理：返回一个默认结果
+            UserLevel fallbackUserLevel = createFallbackResult(userId, levelId, userOptions, level);
+            this.save(fallbackUserLevel);
+            
+            // 不更新薪资（降级情况下保持原薪资）
+            log.warn("使用降级结果报告，用户ID：{}，关卡ID：{}", userId, levelId);
+            return fallbackUserLevel;
+        }
+    }
+    
+    /**
+     * 从关卡选项中提取正确答案
+     */
+    private List<String> extractTrueOptions(String optionsJson) {
+        try {
+            List<LevelOption> options = JSONUtil.toList(optionsJson, LevelOption.class);
+            return options.stream()
+                    .filter(option -> Boolean.TRUE.equals(option.getTrueAnswer()))
+                    .map(LevelOption::getOptionName)
+                    .toList();
+        } catch (Exception e) {
+            log.error("解析关卡选项失败：{}", e.getMessage(), e);
+            return List.of();
+        }
+    }
+    
+    /**
+     * 创建降级结果（当AI服务不可用时使用）
+     */
+    private UserLevel createFallbackResult(String userId, String levelId, 
+                                         List<String> userOptions, Level level) {
         UserLevel userLevel = new UserLevel();
         userLevel.setUserId(userId);
         userLevel.setLevelId(levelId);
         userLevel.setUserOptions(JSONUtil.toJsonStr(userOptions));
-        userLevel.setScore(80); // 示例分数
-        userLevel.setComment("答得不错！");
-        userLevel.setSalaryChange(500); // 示例薪资变化
-        userLevel.setSuggest("可以考虑投递一些中级岗位");
-        userLevel.setReason("选择了大部分正确答案");
-        userLevel.setTrueOptions("[]"); // JSON格式的正确答案
-        userLevel.setStandardAnswer("这是标准答案解析");
-
-        // 保存结果
-        this.save(userLevel);
-
-        // 更新用户薪资
-        userService.updateUserSalary(userId, userLevel.getSalaryChange());
-
+        userLevel.setScore(60); // 默认及格分数
+        userLevel.setComment("系统维护中，暂时无法生成详细评价");
+        userLevel.setSalaryChange(0); // 不变化薪资
+        userLevel.setSuggest("请稍后再试，我们会为您提供更详细的建议");
+        userLevel.setReason("AI服务暂时不可用，无法生成详细分析");
+        userLevel.setTrueOptions("[]");
+        userLevel.setStandardAnswer("抱歉，系统维护中，暂时无法提供标准答案解析");
         return userLevel;
     }
 
