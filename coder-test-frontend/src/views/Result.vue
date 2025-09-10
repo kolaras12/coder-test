@@ -1,25 +1,7 @@
 <template>
   <div class="result-container">
-    <!-- 导航栏 -->
-    <div class="header">
-      <div class="header-content">
-        <div class="logo" @click="$router.push('/')">
-          <el-icon class="logo-icon"><Trophy /></el-icon>
-          <span class="logo-text">程序员技术练兵场</span>
-        </div>
-        
-        <div class="nav-menu">
-          <el-button @click="$router.push('/challenge')">
-            <el-icon><Operation /></el-icon>
-            继续挑战
-          </el-button>
-          <el-button @click="$router.push('/history')">
-            <el-icon><Clock /></el-icon>
-            历史记录
-          </el-button>
-        </div>
-      </div>
-    </div>
+    <!-- 全局导航栏 -->
+    <GlobalNavbar />
 
     <div class="main-content" v-loading="loading">
       <div v-if="resultData" class="result-content">
@@ -48,6 +30,18 @@
                     <span class="salary-label">当前薪资：</span>
                     <span class="current-salary">¥{{ user?.salary?.toLocaleString() || 0 }}/月</span>
                   </div>
+                </div>
+
+                <!-- 快速操作按钮 -->
+                <div class="quick-actions">
+                  <el-button type="primary" @click="$router.push('/challenge')">
+                    <el-icon><KnifeFork /></el-icon>
+                    继续挑战
+                  </el-button>
+                  <el-button @click="$router.push('/history')">
+                    <el-icon><Clock /></el-icon>
+                    历史记录
+                  </el-button>
                 </div>
               </div>
             </div>
@@ -130,21 +124,11 @@
           </el-card>
         </div>
 
-        <!-- 操作按钮 -->
-        <div class="actions-section">
-          <el-button type="primary" size="large" @click="$router.push('/challenge')">
-            <el-icon><Operation /></el-icon>
-            继续挑战
-          </el-button>
-          
-          <el-button size="large" @click="$router.push('/history')">
-            <el-icon><Clock /></el-icon>
-            查看历史
-          </el-button>
-          
-          <el-button size="large" @click="$router.push('/')">
+        <!-- 底部操作 -->
+        <div class="bottom-actions">
+          <el-button size="large" @click="$router.push('/')" class="home-btn">
             <el-icon><House /></el-icon>
-            返回首页
+            返回营地
           </el-button>
         </div>
       </div>
@@ -159,8 +143,7 @@ import { useUserStore } from '../stores/user'
 import { getUserLevelDetail } from '../api/userLevel'
 import { ElMessage } from 'element-plus'
 import {
-  Trophy,
-  Operation,
+  KnifeFork,
   Clock,
   OfficeBuilding,
   Document,
@@ -168,6 +151,7 @@ import {
   Reading,
   House
 } from '@element-plus/icons-vue'
+import GlobalNavbar from '../components/GlobalNavbar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -260,52 +244,22 @@ onMounted(() => {
 <style scoped>
 .result-container {
   min-height: 100vh;
-  background-color: #f5f7fa;
-}
-
-.header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 15px 0;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.logo-icon {
-  font-size: 24px;
-  margin-right: 10px;
-}
-
-.nav-menu {
-  display: flex;
-  gap: 15px;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(210, 180, 140, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 115, 85, 0.1) 0%, transparent 50%);
 }
 
 .main-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 40px 30px;
 }
 
 .result-content {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 35px;
 }
 
 .score-section {
@@ -314,14 +268,30 @@ onMounted(() => {
 }
 
 .score-card {
-  min-width: 600px;
+  min-width: 700px;
+  border: 3px solid var(--border-light) !important;
+  border-radius: 16px !important;
+  background: var(--bg-card) !important;
+  box-shadow: 0 12px 40px var(--shadow-medium) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.score-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-gold) 0%, var(--accent-copper) 100%);
 }
 
 .score-display {
   display: flex;
   align-items: center;
-  gap: 40px;
-  padding: 20px;
+  gap: 50px;
+  padding: 35px;
 }
 
 .score-circle {
@@ -337,17 +307,17 @@ onMounted(() => {
 }
 
 .score-circle.excellent {
-  --score-color: #67c23a;
+  --score-color: var(--accent-gold);
   --score-percent: 80%;
 }
 
 .score-circle.good {
-  --score-color: #e6a23c;
+  --score-color: var(--accent-copper);
   --score-percent: 60%;
 }
 
 .score-circle.poor {
-  --score-color: #f56c6c;
+  --score-color: var(--secondary-brown);
   --score-percent: 40%;
 }
 
@@ -361,16 +331,17 @@ onMounted(() => {
 }
 
 .score-number {
-  font-size: 36px;
-  font-weight: bold;
-  color: #333;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-primary);
   z-index: 1;
 }
 
 .score-label {
-  font-size: 14px;
-  color: #666;
+  font-size: 16px;
+  color: var(--text-secondary);
   z-index: 1;
+  font-weight: 500;
 }
 
 .score-info {
@@ -378,16 +349,18 @@ onMounted(() => {
 }
 
 .score-title {
-  color: #333;
-  margin-bottom: 10px;
-  font-size: 24px;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .score-comment {
-  color: #666;
-  font-size: 16px;
-  margin-bottom: 20px;
-  line-height: 1.6;
+  color: var(--text-secondary);
+  font-size: 18px;
+  margin-bottom: 25px;
+  line-height: 1.8;
 }
 
 .salary-change {
@@ -425,25 +398,51 @@ onMounted(() => {
 }
 
 .current-salary {
-  color: #409eff;
+  color: var(--accent-gold);
   font-weight: bold;
-  font-size: 16px;
+  font-size: 18px;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+}
+
+.quick-actions .el-button {
+  font-weight: 600;
+  border-radius: 25px;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+}
+
+.quick-actions .el-button:hover {
+  transform: translateY(-2px);
 }
 
 .section-title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+.section-title .el-icon {
+  color: var(--accent-gold);
+  font-size: 22px;
 }
 
 .suggestion-content,
 .reason-content {
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.8;
-  font-size: 15px;
+  font-size: 16px;
+  padding: 5px 0;
 }
 
 .answers-content {
@@ -492,22 +491,28 @@ onMounted(() => {
   color: #e96900;
 }
 
-.actions-section {
+.bottom-actions {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  padding: 20px 0;
+  padding: 30px 0;
+}
+
+.home-btn {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 25px !important;
+  padding: 14px 28px !important;
+  letter-spacing: 1px !important;
+  transition: all 0.3s ease !important;
+}
+
+.home-btn:hover {
+  transform: translateY(-2px) !important;
 }
 
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .nav-menu {
-    flex-wrap: wrap;
-    justify-content: center;
+  .main-content {
+    padding: 30px 20px;
   }
   
   .score-card {
@@ -517,15 +522,47 @@ onMounted(() => {
   .score-display {
     flex-direction: column;
     text-align: center;
-    gap: 20px;
+    gap: 30px;
+    padding: 30px 25px;
   }
   
-  .actions-section {
+  .score-title {
+    font-size: 28px;
+  }
+  
+  .score-comment {
+    font-size: 16px;
+  }
+  
+  .quick-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .section-title {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 20px 15px;
+  }
+  
+  .score-display {
+    padding: 25px 20px;
+  }
+  
+  .score-title {
+    font-size: 24px;
+  }
+  
+  .quick-actions {
     flex-direction: column;
     align-items: center;
   }
   
-  .actions-section .el-button {
+  .quick-actions .el-button {
     width: 200px;
   }
 }

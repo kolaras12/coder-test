@@ -1,41 +1,22 @@
 <template>
   <div class="history-container">
-    <!-- 导航栏 -->
-    <div class="header">
-      <div class="header-content">
-        <div class="logo" @click="$router.push('/')">
-          <el-icon class="logo-icon"><Trophy /></el-icon>
-          <span class="logo-text">程序员技术练兵场</span>
-        </div>
-        
-        <div class="nav-menu">
-          <el-button @click="$router.push('/challenge')">
-            <el-icon><Operation /></el-icon>
-            继续挑战
-          </el-button>
-          
-          <el-dropdown>
-            <span class="user-name">
-              {{ user?.nickname || user?.username }}
-              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="handleLogout">
-                  <el-icon><SwitchButton /></el-icon>
-                  退出登录
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </div>
-    </div>
+    <!-- 全局导航栏 -->
+    <GlobalNavbar />
 
     <div class="main-content">
       <div class="page-header">
-        <h1>闯关历史</h1>
-        <p>查看你的所有挑战记录和成长轨迹</p>
+        <div class="header-content">
+          <div class="header-text">
+            <h1>征战记录</h1>
+            <p>回顾沙场征战历程，见证技艺精进之路</p>
+          </div>
+          <div class="header-actions">
+            <el-button type="primary" size="large" @click="$router.push('/challenge')">
+              <el-icon><KnifeFork /></el-icon>
+              继续征战
+            </el-button>
+          </div>
+        </div>
       </div>
 
       <!-- 统计信息 -->
@@ -73,7 +54,7 @@
             <el-card class="stat-card">
               <div class="stat-content">
                 <div class="stat-icon">
-                  <el-icon size="30"><Money /></el-icon>
+                  <el-icon size="30"><Coin /></el-icon>
                 </div>
                 <div class="stat-info">
                   <div class="stat-number">{{ user?.salary?.toLocaleString() || 0 }}</div>
@@ -87,7 +68,7 @@
             <el-card class="stat-card">
               <div class="stat-content">
                 <div class="stat-icon">
-                  <el-icon size="30"><DataAnalysis /></el-icon>
+                  <el-icon size="30"><TrendCharts /></el-icon>
                 </div>
                 <div class="stat-info">
                   <div class="stat-number" :class="totalSalaryChangeClass">
@@ -116,9 +97,10 @@
 
           <div v-loading="loading" class="history-list">
             <div v-if="historyList.length === 0" class="empty-state">
-              <el-empty description="暂无挑战记录">
+              <el-empty description="尚未有征战记录">
                 <el-button type="primary" @click="$router.push('/challenge')">
-                  开始第一次挑战
+                  <el-icon><KnifeFork /></el-icon>
+                  踏上征程
                 </el-button>
               </el-empty>
             </div>
@@ -171,15 +153,14 @@ import { getUserLevelHistory } from '../api/userLevel'
 import { ElMessage } from 'element-plus'
 import {
   Trophy,
-  Operation,
-  ArrowDown,
-  SwitchButton,
+  KnifeFork,
   Star,
-  Money,
-  DataAnalysis,
+  Coin,
+  TrendCharts,
   Refresh,
   ArrowRight
 } from '@element-plus/icons-vue'
+import GlobalNavbar from '../components/GlobalNavbar.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -207,10 +188,6 @@ const totalSalaryChangeClass = computed(() => {
   return 'neutral'
 })
 
-const handleLogout = async () => {
-  await userStore.logoutUser()
-  router.push('/')
-}
 
 // 获取关卡名称（从用户选择的选项中提取或使用默认名称）
 const getLevelName = (item) => {
@@ -282,112 +259,110 @@ onMounted(() => {
 <style scoped>
 .history-container {
   min-height: 100vh;
-  background-color: #f5f7fa;
-}
-
-.header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 15px 0;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.logo-icon {
-  font-size: 24px;
-  margin-right: 10px;
-}
-
-.nav-menu {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.user-name {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  color: white;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(210, 180, 140, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 115, 85, 0.1) 0%, transparent 50%);
 }
 
 .main-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 40px 30px;
 }
 
 .page-header {
-  text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 50px;
 }
 
-.page-header h1 {
-  font-size: 36px;
-  margin-bottom: 10px;
-  color: #333;
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 0;
 }
 
-.page-header p {
-  color: #666;
-  font-size: 16px;
+.header-text h1 {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+}
+
+.header-text p {
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.header-actions .el-button {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 25px !important;
+  padding: 14px 28px !important;
+  letter-spacing: 1px !important;
+  transition: all 0.3s ease !important;
+}
+
+.header-actions .el-button:hover {
+  transform: translateY(-2px) !important;
 }
 
 .stats-section {
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
-.stat-card {
-  height: 100px;
+.stats-section :deep(.el-card) {
+  border: 2px solid var(--border-light) !important;
+  border-radius: 12px !important;
+  background: var(--bg-card) !important;
+  box-shadow: 0 8px 24px var(--shadow-light) !important;
+  transition: all 0.3s ease !important;
+  height: 120px;
+}
+
+.stats-section :deep(.el-card:hover) {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 32px var(--shadow-medium) !important;
+  border-color: var(--border-medium) !important;
 }
 
 .stat-content {
   display: flex;
   align-items: center;
   height: 100%;
+  padding: 5px;
 }
 
 .stat-icon {
-  margin-right: 15px;
-  color: #409eff;
+  margin-right: 20px;
+  color: var(--accent-gold);
 }
 
 .stat-number {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 5px;
 }
 
 .stat-number.positive {
-  color: #67c23a;
+  color: var(--accent-gold);
 }
 
 .stat-number.negative {
-  color: #f56c6c;
+  color: var(--secondary-brown);
 }
 
 .stat-number.neutral {
-  color: #909399;
+  color: var(--text-muted);
 }
 
 .stat-label {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .card-header {
@@ -396,107 +371,186 @@ onMounted(() => {
   align-items: center;
 }
 
+.card-header span {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
 .history-items {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
 .history-item {
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  padding: 20px;
-  background: white;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  padding: 25px;
+  background: var(--bg-card);
   cursor: pointer;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.history-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(218, 165, 32, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.history-item:hover::before {
+  left: 100%;
 }
 
 .history-item:hover {
-  border-color: #409eff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent-gold);
+  box-shadow: 0 8px 25px var(--shadow-medium);
+  transform: translateY(-3px);
 }
 
 .item-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 2;
 }
 
 .level-name {
-  color: #333;
-  margin-bottom: 5px;
-  font-size: 18px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .level-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .challenge-time {
-  color: #999;
-  font-size: 13px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .item-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .salary-change {
-  font-weight: bold;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .salary-positive {
-  color: #67c23a;
+  color: var(--accent-gold);
+  background: rgba(218, 165, 32, 0.1);
 }
 
 .salary-negative {
-  color: #f56c6c;
+  color: var(--secondary-brown);
+  background: rgba(160, 82, 45, 0.1);
 }
 
 .salary-neutral {
-  color: #909399;
+  color: var(--text-muted);
+  background: rgba(139, 125, 107, 0.1);
 }
 
 .arrow-icon {
-  color: #c0c4cc;
+  color: var(--accent-gold);
+  font-size: 18px;
 }
 
 .comment {
-  color: #666;
+  color: var(--text-secondary);
   margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.6;
+  position: relative;
+  z-index: 2;
 }
 
 .empty-state {
-  padding: 60px 20px;
+  padding: 80px 20px;
   text-align: center;
 }
 
+.empty-state :deep(.el-empty__description) {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
 @media (max-width: 768px) {
+  .main-content {
+    padding: 30px 20px;
+  }
+  
   .header-content {
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .header-text h1 {
+    font-size: 36px;
+  }
+  
+  .header-text p {
+    font-size: 16px;
   }
   
   .stats-section .el-col {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
   }
   
   .item-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
   }
   
   .item-actions {
     align-self: flex-end;
+  }
+  
+  .level-name {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 20px 15px;
+  }
+  
+  .header-text h1 {
+    font-size: 28px;
+  }
+  
+  .history-item {
+    padding: 20px;
+  }
+  
+  .stat-number {
+    font-size: 24px;
   }
 }
 </style>

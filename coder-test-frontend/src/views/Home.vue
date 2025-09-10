@@ -1,115 +1,73 @@
 <template>
   <div class="home">
-    <!-- 导航栏 -->
-    <el-header class="header">
-      <div class="header-content">
-        <div class="logo">
-          <el-icon class="logo-icon"><Trophy /></el-icon>
-          <span class="logo-text">程序员技术练兵场</span>
-        </div>
-        
-        <div class="nav-menu">
-          <el-button v-if="!isLoggedIn" type="primary" @click="$router.push('/login')">
-            登录
-          </el-button>
-          <el-button v-if="!isLoggedIn" @click="$router.push('/register')">
-            注册
-          </el-button>
-          
-          <div v-if="isLoggedIn" class="user-info">
-            <el-dropdown>
-              <span class="user-name">
-                {{ user.nickname || user.username }}
-                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-              </span>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="$router.push('/challenge')">
-                    <el-icon><Operation /></el-icon>
-                    开始挑战
-                  </el-dropdown-item>
-                  <el-dropdown-item @click="$router.push('/history')">
-                    <el-icon><Clock /></el-icon>
-                    闯关历史
-                  </el-dropdown-item>
-                  <el-dropdown-item divided @click="handleLogout">
-                    <el-icon><SwitchButton /></el-icon>
-                    退出登录
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
-        </div>
-      </div>
-    </el-header>
+    <!-- 全局导航栏 -->
+    <GlobalNavbar />
 
-    <!-- 主要内容 -->
-    <div class="main-content">
-      <!-- 欢迎区域 -->
-      <div class="welcome-section">
-        <h1 class="welcome-title">欢迎来到程序员技术练兵场</h1>
-        <p class="welcome-desc">
-          通过AI生成的技术关卡，提升你的需求分析、方案设计能力，评估当前薪资水平
-        </p>
-        
-        <div v-if="isLoggedIn" class="user-status">
-          <el-card class="status-card">
-            <div class="status-info">
-              <div class="salary-info">
-                <el-icon class="salary-icon"><Money /></el-icon>
-                <span class="salary-label">当前薪资：</span>
+    <!-- 主横幅区域 -->
+    <div class="hero-section">
+      <div class="hero-banner">
+        <img :src="bannerImage" alt="技术练兵场" class="banner-image" />
+        <div class="hero-overlay">
+          <div class="hero-content">
+            <h1 class="hero-title">程序员技术练兵场</h1>
+            <div class="hero-subtitle">沙场点兵 · 技艺精进</div>
+            <p class="hero-desc">
+              如古之名将练兵于沙场，今之程序员磨技于此地<br>
+              通过AI生成的技术关卡，提升需求分析、方案设计之能<br>
+              评估技术水平，助君在编程之路上策马扬鞭
+            </p>
+            
+            <div class="hero-actions" :class="{ 'logged-in': isLoggedIn }">
+              <div v-if="isLoggedIn" class="salary-display">
+                <el-icon class="salary-icon"><Coin /></el-icon>
+                <span class="salary-label">当前身价：</span>
                 <span class="salary-value">¥{{ user.salary?.toLocaleString() || 0 }}/月</span>
               </div>
-              <el-button type="primary" size="large" @click="startChallenge">
-                <el-icon><Operation /></el-icon>
+              <el-button type="primary" size="large" class="challenge-btn" @click="handleChallengeClick">
+                <el-icon><KnifeFork /></el-icon>
                 开始挑战
               </el-button>
             </div>
-          </el-card>
-        </div>
-
-        <div v-else class="login-prompt">
-          <el-card class="prompt-card">
-            <p>请先登录或注册账号，开始你的技术挑战之旅！</p>
-            <div class="prompt-buttons">
-              <el-button type="primary" size="large" @click="$router.push('/login')">
-                立即登录
-              </el-button>
-              <el-button size="large" @click="$router.push('/register')">
-                注册账号
-              </el-button>
-            </div>
-          </el-card>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- 特性介绍 -->
+    <!-- 主要内容 -->
+    <div class="main-content">
+      <!-- 特色功能 -->
       <div class="features-section">
-        <h2 class="section-title">平台特色</h2>
+        <div class="section-header">
+          <h2 class="section-title">练兵场特色</h2>
+          <div class="section-subtitle">如古之兵法，今之技艺</div>
+        </div>
+        
         <div class="features-grid">
           <el-card class="feature-card">
             <div class="feature-icon">
-              <el-icon size="40"><MagicStick /></el-icon>
+              <el-icon size="48"><MagicStick /></el-icon>
             </div>
-            <h3>AI智能生成</h3>
-            <p>基于AI技术生成真实的企业需求场景，提供丰富的技术选项和干扰项</p>
+            <h3>智能生成</h3>
+            <p>如孙武练兵，AI生成真实企业场景<br>丰富技术选项，考验决策智慧</p>
+            <div class="feature-decoration"></div>
           </el-card>
           
           <el-card class="feature-card">
             <div class="feature-icon">
-              <el-icon size="40"><DataAnalysis /></el-icon>
+              <el-icon size="48"><TrendCharts /></el-icon>
             </div>
-            <h3>薪资评估</h3>
-            <p>根据答题表现动态调整薪资，帮助你准确评估自己的技术水平</p>
+            <h3>能力评估</h3>
+            <p>根据答题表现动态调整身价<br>准确评估技术水平，知己知彼</p>
+            <div class="feature-decoration"></div>
           </el-card>
           
           <el-card class="feature-card">
             <div class="feature-icon">
-              <el-icon size="40"><Star /></el-icon>
+              <el-icon size="48"><Guide /></el-icon>
             </div>
-            <h3>个性化建议</h3>
-            <p>提供投递公司建议和详细的技术解析，助你在职场中更进一步</p>
+            <h3>策略指导</h3>
+            <p>提供投递建议和技术解析<br>助君在职场征途中运筹帷幄</p>
+            <div class="feature-decoration"></div>
           </el-card>
         </div>
       </div>
@@ -122,16 +80,14 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { 
-  Trophy, 
-  ArrowDown, 
-  Operation, 
-  Clock, 
-  SwitchButton, 
-  Money, 
+  KnifeFork, 
+  Coin, 
   MagicStick, 
-  DataAnalysis, 
-  Star 
+  TrendCharts, 
+  Guide 
 } from '@element-plus/icons-vue'
+import bannerImage from '../assets/banner.png'
+import GlobalNavbar from '../components/GlobalNavbar.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -147,188 +103,333 @@ const handleLogout = async () => {
 const startChallenge = () => {
   router.push('/challenge')
 }
+
+const handleChallengeClick = () => {
+  if (isLoggedIn.value) {
+    // 已登录，直接开始挑战
+    startChallenge()
+  } else {
+    // 未登录，跳转到登录页面
+    router.push('/login')
+  }
+}
 </script>
 
 <style scoped>
 .home {
-  min-height: calc(100vh - 200px);
+  min-height: 100vh;
+  background: var(--bg-primary);
 }
 
-.header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  height: 60px;
-  padding: 0;
+
+/* 主横幅区域 */
+.hero-section {
+  position: relative;
+  height: 600px;
+  overflow: hidden;
 }
 
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
+.hero-banner {
+  position: relative;
+  width: 100%;
   height: 100%;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7) sepia(0.3) saturate(1.2);
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(60, 36, 21, 0.8) 0%,
+    rgba(139, 115, 85, 0.6) 50%,
+    rgba(210, 180, 140, 0.4) 100%
+  );
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+  justify-content: center;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.logo-icon {
-  font-size: 24px;
-  margin-right: 10px;
-}
-
-.nav-menu {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.user-name {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  color: white;
-}
-
-.main-content {
-  flex: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.welcome-section {
+.hero-content {
   text-align: center;
-  margin-bottom: 80px;
+  color: var(--bg-card);
+  max-width: 800px;
+  padding: 0 30px;
 }
 
-.welcome-title {
-  font-size: 48px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.hero-title {
+  font-size: 56px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--bg-card) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.welcome-desc {
+.hero-subtitle {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: var(--accent-gold);
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-desc {
   font-size: 18px;
-  color: #666;
+  line-height: 1.8;
   margin-bottom: 40px;
-  line-height: 1.6;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  opacity: 0.95;
 }
 
-.user-status, .login-prompt {
-  display: flex;
-  justify-content: center;
-}
-
-.status-card, .prompt-card {
-  min-width: 400px;
-}
-
-.status-info {
+.hero-actions {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
 }
 
-.salary-info {
+.hero-actions.logged-in {
+  gap: 25px;
+}
+
+.salary-display {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  padding: 12px 24px;
+  background: rgba(218, 165, 32, 0.2);
+  border: 2px solid var(--accent-gold);
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
   font-size: 18px;
+  font-weight: 600;
 }
 
 .salary-icon {
-  color: #f56c6c;
-  font-size: 20px;
+  color: var(--accent-gold);
+  font-size: 22px;
+}
+
+.salary-label {
+  color: var(--bg-card);
 }
 
 .salary-value {
-  font-weight: bold;
-  color: #409eff;
+  color: var(--accent-gold);
   font-size: 20px;
+  font-weight: 700;
 }
 
-.prompt-buttons {
-  margin-top: 20px;
-  display: flex;
-  gap: 15px;
-  justify-content: center;
+.challenge-btn, .primary-btn, .secondary-btn {
+  font-size: 18px !important;
+  padding: 16px 32px !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+  min-width: 180px;
+}
+
+.challenge-btn {
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-copper) 100%) !important;
+  border: 3px solid var(--accent-gold) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 6px 20px rgba(218, 165, 32, 0.4) !important;
+}
+
+.challenge-btn:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(218, 165, 32, 0.6) !important;
+}
+
+/* 主要内容区域 */
+.main-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 30px;
 }
 
 .features-section {
+  margin-bottom: 80px;
+}
+
+.section-header {
+  text-align: center;
   margin-bottom: 60px;
 }
 
 .section-title {
-  text-align: center;
-  font-size: 32px;
-  margin-bottom: 40px;
-  color: #333;
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-gold) 0%, var(--accent-copper) 100%);
+  border-radius: 2px;
+}
+
+.section-subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  font-style: italic;
+  letter-spacing: 1px;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 40px;
+  margin-top: 60px;
 }
 
 .feature-card {
   text-align: center;
-  padding: 30px 20px;
-  transition: transform 0.3s ease;
+  padding: 40px 30px;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-card) !important;
+  border: 3px solid var(--border-light) !important;
+  transition: all 0.4s ease !important;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(218, 165, 32, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.feature-card:hover::before {
+  left: 100%;
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) !important;
+  border-color: var(--accent-gold) !important;
+  box-shadow: 0 15px 40px var(--shadow-heavy) !important;
 }
 
 .feature-icon {
-  margin-bottom: 20px;
-  color: #409eff;
+  margin-bottom: 24px;
+  color: var(--primary-brown);
+  position: relative;
+  z-index: 2;
 }
 
 .feature-card h3 {
-  font-size: 20px;
-  margin-bottom: 15px;
-  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 2;
 }
 
 .feature-card p {
-  color: #666;
-  line-height: 1.6;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  font-size: 16px;
+  position: relative;
+  z-index: 2;
 }
 
+.feature-decoration {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-copper) 100%);
+  border-radius: 50%;
+  opacity: 0.1;
+  transform: scale(0);
+  transition: all 0.4s ease;
+}
 
+.feature-card:hover .feature-decoration {
+  transform: scale(1);
+  opacity: 0.2;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .header-content {
-    padding: 0 15px;
+  
+  .hero-title {
+    font-size: 40px;
   }
   
-  .welcome-title {
-    font-size: 36px;
-  }
-  
-  .welcome-desc {
+  .hero-desc {
     font-size: 16px;
   }
   
   .features-grid {
     grid-template-columns: 1fr;
+    gap: 30px;
   }
   
-  .status-card, .prompt-card {
-    min-width: auto;
+  .main-content {
+    padding: 60px 20px;
+  }
+  
+  .hero-content {
+    padding: 0 20px;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .challenge-btn, .primary-btn, .secondary-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    height: 500px;
+  }
+  
+  .hero-title {
+    font-size: 32px;
+  }
+  
+  .section-title {
+    font-size: 32px;
+  }
+  
+  .feature-card {
+    padding: 30px 20px;
   }
 }
 </style>

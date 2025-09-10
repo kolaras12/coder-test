@@ -76,9 +76,20 @@ const currentYear = computed(() => {
 
 <style scoped>
 .footer-container {
-  background-color: #f8f9fa;
-  padding: 40px 0 0;
-  border-top: 1px solid #e9ecef;
+  background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-brown) 100%);
+  padding: 60px 0 0;
+  border-top: 4px solid var(--accent-gold);
+  position: relative;
+}
+
+.footer-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-gold) 0%, var(--accent-copper) 50%, var(--accent-gold) 100%);
 }
 
 .footer-row {
@@ -106,7 +117,6 @@ const currentYear = computed(() => {
 }
 
 .logo-icon {
-  color: #409eff;
   margin-right: 12px;
   margin-top: -10px;
 }
@@ -114,15 +124,18 @@ const currentYear = computed(() => {
 .logo-text {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--bg-card);
   margin: 0;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .footer-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: var(--accent-gold);
   margin: 0 0 20px 0;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .footer-links {
@@ -141,17 +154,34 @@ const currentYear = computed(() => {
 }
 
 .footer-protocol-button {
-  color: #666;
+  color: var(--secondary-sand);
   text-decoration: none;
   font-size: 14px;
   line-height: 1.5;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
   display: inline-block;
-  padding: 2px 0;
+  padding: 6px 0;
+  position: relative;
+}
+
+.footer-protocol-button::before {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent-gold);
+  transition: width 0.3s ease;
 }
 
 .footer-protocol-button:hover {
-  color: #409eff;
+  color: var(--accent-gold);
+  transform: translateX(4px);
+}
+
+.footer-protocol-button:hover::before {
+  width: 100%;
 }
 
 .about-section {
@@ -184,27 +214,60 @@ const currentYear = computed(() => {
 
 .copyright-footer {
   text-align: center;
-  margin-bottom: 30px;
-  color: #b7b6b6;
+  margin-bottom: 40px;
+  color: var(--secondary-sand);
   font-size: 14px;
-  padding: 0 20px;
+  padding: 30px 20px 0;
+  border-top: 1px solid rgba(210, 180, 140, 0.2);
+  position: relative;
+}
+
+.copyright-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 1px;
+  background: var(--accent-gold);
 }
 
 .copyright-text {
   margin-right: 20px;
+  font-weight: 500;
 }
 
 .footer-protocol-link,
 .footer-about-me {
-  color: #b7b6b6;
+  color: var(--secondary-sand);
   text-decoration: none;
-  margin: 0 8px;
-  transition: color 0.3s ease;
+  margin: 0 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 2px 0;
+}
+
+.footer-protocol-link::before,
+.footer-about-me::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent-gold);
+  transition: width 0.3s ease;
 }
 
 .footer-protocol-link:hover,
 .footer-about-me:hover {
-  color: #409eff;
+  color: var(--accent-gold);
+}
+
+.footer-protocol-link:hover::before,
+.footer-about-me:hover::before {
+  width: 100%;
 }
 
 /* 响应式设计 */

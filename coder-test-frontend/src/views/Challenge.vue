@@ -1,39 +1,7 @@
 <template>
   <div class="challenge-container">
-    <!-- 导航栏 -->
-    <div class="header">
-      <div class="header-content">
-        <div class="logo" @click="$router.push('/')">
-          <el-icon class="logo-icon"><Trophy /></el-icon>
-          <span class="logo-text">程序员技术练兵场</span>
-        </div>
-        
-        <div class="user-info">
-          <span class="salary-info">
-            <el-icon><Money /></el-icon>
-            当前薪资：¥{{ user?.salary?.toLocaleString() || 0 }}/月
-          </span>
-          <el-dropdown>
-            <span class="user-name">
-              {{ user?.nickname || user?.username }}
-              <el-icon class="el-icon--right"><arrow-down /></el-icon>
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/history')">
-                  <el-icon><Clock /></el-icon>
-                  闯关历史
-                </el-dropdown-item>
-                <el-dropdown-item divided @click="handleLogout">
-                  <el-icon><SwitchButton /></el-icon>
-                  退出登录
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </div>
-    </div>
+    <!-- 全局导航栏 -->
+    <GlobalNavbar />
 
     <div class="main-content">
       <!-- 生成关卡区域 -->
@@ -160,16 +128,12 @@ import { generateLevel as generateLevelAPI } from '../api/level'
 import { submitAnswer as submitAnswerAPI } from '../api/userLevel'
 import { ElMessage } from 'element-plus'
 import {
-  Trophy,
-  Money,
-  ArrowDown,
-  Clock,
-  SwitchButton,
   MagicStick,
   Check,
   Refresh,
   Close
 } from '@element-plus/icons-vue'
+import GlobalNavbar from '../components/GlobalNavbar.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -196,10 +160,6 @@ const availableOptions = computed(() => {
   }
 })
 
-const handleLogout = async () => {
-  await userStore.logoutUser()
-  router.push('/')
-}
 
 const getDifficultyType = (difficulty) => {
   switch (difficulty) {
@@ -353,60 +313,16 @@ onMounted(() => {
 <style scoped>
 .challenge-container {
   min-height: 100vh;
-  background-color: #f5f7fa;
-}
-
-.header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 15px 0;
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.logo-icon {
-  font-size: 24px;
-  margin-right: 10px;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.salary-info {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 14px;
-}
-
-.user-name {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(210, 180, 140, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 115, 85, 0.1) 0%, transparent 50%);
 }
 
 .main-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 40px 30px;
 }
 
 .generate-section {
@@ -427,14 +343,18 @@ onMounted(() => {
 }
 
 .generate-content h2 {
-  margin-bottom: 15px;
-  color: #333;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .generate-content p {
-  margin-bottom: 30px;
-  color: #666;
-  line-height: 1.6;
+  margin-bottom: 35px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  font-size: 16px;
 }
 
 .level-section {
@@ -452,9 +372,11 @@ onMounted(() => {
 }
 
 .level-name {
-  color: #333;
-  margin-bottom: 10px;
-  font-size: 24px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .level-meta {
@@ -464,22 +386,28 @@ onMounted(() => {
 }
 
 .target-salary {
-  color: #666;
-  font-size: 14px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .level-desc h3 {
-  color: #333;
-  margin-bottom: 10px;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .desc-content {
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.8;
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border-left: 4px solid #409eff;
+  background: var(--bg-secondary);
+  padding: 25px;
+  border-radius: 12px;
+  border-left: 4px solid var(--accent-gold);
+  border: 2px solid var(--border-light);
+  font-size: 15px;
 }
 
 .answer-section {
@@ -490,8 +418,11 @@ onMounted(() => {
 
 .options-area h3,
 .answer-area h3 {
-  color: #333;
-  margin-bottom: 15px;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .options-grid {
@@ -501,59 +432,66 @@ onMounted(() => {
 }
 
 .option-item {
-  background: white;
-  border: 2px solid #e4e7ed;
-  border-radius: 8px;
-  padding: 15px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  padding: 18px 15px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   user-select: none;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 .option-item:hover {
-  border-color: #409eff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
+  border-color: var(--primary-brown);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px var(--shadow-medium);
 }
 
 .option-item.selected {
-  background-color: #ecf5ff;
-  border-color: #409eff;
-  color: #409eff;
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-copper) 100%);
+  border-color: var(--accent-gold);
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .answer-box {
-  min-height: 200px;
-  border: 2px dashed #d3d3d3;
-  border-radius: 8px;
-  padding: 20px;
-  background-color: white;
+  min-height: 220px;
+  border: 2px dashed var(--border-medium);
+  border-radius: 12px;
+  padding: 25px;
+  background: var(--bg-card);
   transition: all 0.3s ease;
 }
 
 .answer-box.drag-over {
-  border-color: #409eff;
-  background-color: #ecf5ff;
+  border-color: var(--accent-gold);
+  background: var(--secondary-sand);
+  border-style: solid;
 }
 
 .answer-placeholder {
   text-align: center;
-  color: #999;
+  color: var(--text-muted);
   font-style: italic;
-  padding: 60px 20px;
+  padding: 70px 20px;
+  font-size: 15px;
 }
 
 .selected-option {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background-color: #409eff;
-  color: white;
-  padding: 8px 15px;
-  border-radius: 20px;
-  margin: 5px;
+  background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-brown) 100%);
+  color: var(--bg-card);
+  padding: 10px 18px;
+  border-radius: 25px;
+  margin: 6px;
   font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .submit-area {
