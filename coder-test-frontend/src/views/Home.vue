@@ -114,11 +114,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 页脚 -->
-    <el-footer class="footer">
-      <p>&copy; 2024 程序员技术练兵场. All rights reserved.</p>
-    </el-footer>
   </div>
 </template>
 
@@ -156,9 +151,7 @@ const startChallenge = () => {
 
 <style scoped>
 .home {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  min-height: calc(100vh - 200px);
 }
 
 .header {
@@ -316,15 +309,6 @@ const startChallenge = () => {
   line-height: 1.6;
 }
 
-.footer {
-  background-color: #f8f9fa;
-  text-align: center;
-  color: #666;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 @media (max-width: 768px) {
   .header-content {

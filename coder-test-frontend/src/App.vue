@@ -1,12 +1,16 @@
 <template>
   <div id="app">
-    <router-view />
+    <div class="app-content">
+      <router-view />
+    </div>
+    <GlobalFooter />
   </div>
 </template>
 
 <script setup>
 import { onMounted } from 'vue'
 import { useUserStore } from './stores/user'
+import GlobalFooter from './components/GlobalFooter.vue'
 
 const userStore = useUserStore()
 
@@ -30,5 +34,11 @@ body {
 
 #app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
 }
 </style>

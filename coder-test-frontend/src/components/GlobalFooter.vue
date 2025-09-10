@@ -1,0 +1,266 @@
+<template>
+  <div class="footer-container">
+    <div class="footer-row">
+      <!-- Logo和基本信息 -->
+      <div class="footer-section logo-section">
+        <div class="footer-logo">
+          <el-icon class="logo-icon" :size="48"><Trophy /></el-icon>
+          <h5 class="logo-text">程序员技术练兵场</h5>
+        </div>
+        <div class="footer-links">
+          <a href="#" class="footer-protocol-button">《用户协议》</a>
+          <a href="#" class="footer-protocol-button">《隐私政策》</a>
+        </div>
+      </div>
+
+      <!-- 友情链接 -->
+      <div class="footer-section">
+        <h5 class="footer-title">友情链接</h5>
+        <div class="footer-links">
+          <a href="https://www.codefather.cn/" target="_blank" class="footer-protocol-button">编程导航</a>
+          <a href="https://www.laoyujianli.com/" target="_blank" class="footer-protocol-button">老鱼简历</a>
+          <a href="https://www.codecopy.cn/" target="_blank" class="footer-protocol-button">代码小抄</a>
+          <a href="https://jianqiezhushou.com/" target="_blank" class="footer-protocol-button">剪切助手</a>
+          <a href="https://mianshiya.com/" target="_blank" class="footer-protocol-button">面试鸭</a>
+        </div>
+      </div>
+
+      <!-- 联系我们 -->
+      <div class="footer-section">
+        <h5 class="footer-title">联系我们</h5>
+        <div class="footer-links">
+          <a href="#" target="_blank" class="footer-protocol-button">商务合作</a>
+          <a href="#" target="_blank" class="footer-protocol-button">站长：程序员鱼皮</a>
+        </div>
+      </div>
+
+      <!-- 关注我们 -->
+      <div class="footer-section about-section">
+        <h5 class="footer-title">关注我们</h5>
+        <div class="qrcode-section">
+          <img 
+            :src="qrcodeImage" 
+            alt="微信公众号"
+            class="qrcode-image"
+            width="65" 
+            height="65"
+          />
+          <span class="qrcode-text">扫码关注<br>站长鱼皮的公众号</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 版权信息 -->
+    <footer class="copyright-footer">
+      <span class="copyright-text">{{ currentYear }} 程序员鱼皮</span>
+      <a class="footer-protocol-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">
+        暂无备案号
+      </a>
+      <a class="footer-about-me" href="/about" target="_blank" rel="noreferrer">
+        关于我们
+      </a>
+    </footer>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { Trophy } from '@element-plus/icons-vue'
+import qrcodeImage from '../assets/qrcode.jpg'
+
+// 获取当前年份
+const currentYear = computed(() => {
+  return new Date().getFullYear()
+})
+</script>
+
+<style scoped>
+.footer-container {
+  background-color: #f8f9fa;
+  padding: 40px 0 0;
+  border-top: 1px solid #e9ecef;
+}
+
+.footer-row {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  padding: 0 26px 40px;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-section {
+  padding-left: 0;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logo-icon {
+  color: #409eff;
+  margin-right: 12px;
+  margin-top: -10px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.footer-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 46px;
+}
+
+.logo-section .footer-links {
+  padding-left: 46px;
+}
+
+.footer-section:not(.logo-section) .footer-links {
+  padding-left: 0;
+}
+
+.footer-protocol-button {
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: color 0.3s ease;
+  display: inline-block;
+  padding: 2px 0;
+}
+
+.footer-protocol-button:hover {
+  color: #409eff;
+}
+
+.about-section {
+  align-items: flex-start;
+}
+
+.qrcode-section {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.qrcode-image {
+  width: 65px;
+  height: 65px;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  object-fit: cover;
+}
+
+.qrcode-text {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  margin-left: 4px;
+  display: block;
+}
+
+.copyright-footer {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #b7b6b6;
+  font-size: 14px;
+  padding: 0 20px;
+}
+
+.copyright-text {
+  margin-right: 20px;
+}
+
+.footer-protocol-link,
+.footer-about-me {
+  color: #b7b6b6;
+  text-decoration: none;
+  margin: 0 8px;
+  transition: color 0.3s ease;
+}
+
+.footer-protocol-link:hover,
+.footer-about-me:hover {
+  color: #409eff;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .footer-row {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 0 20px 30px;
+  }
+  
+  .footer-links {
+    padding-left: 0 !important;
+  }
+  
+  .logo-section .footer-links {
+    padding-left: 0 !important;
+  }
+  
+  .qrcode-section {
+    justify-content: flex-start;
+  }
+  
+  .copyright-footer {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  
+  .copyright-text {
+    display: block;
+    margin: 0 0 10px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    padding: 30px 0 0;
+  }
+  
+  .footer-row {
+    padding: 0 15px 20px;
+  }
+  
+  .footer-logo {
+    justify-content: center;
+  }
+  
+  .footer-section {
+    text-align: center;
+  }
+  
+  .footer-links {
+    align-items: center;
+  }
+  
+  .qrcode-section {
+    justify-content: center;
+  }
+}
+</style>
