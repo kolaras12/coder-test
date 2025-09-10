@@ -29,6 +29,15 @@
                 :style="{ left: loadingPosition.x + 'px', top: loadingPosition.y + 'px' }"
               />
               <div class="loading-text">正在生成关卡中...</div>
+              <div class="progress-container">
+                <el-progress 
+                  :percentage="generateProgress" 
+                  :stroke-width="6"
+                  :show-text="false"
+                  color="#DAA520"
+                />
+                <div class="progress-text">{{ generateProgress }}%</div>
+              </div>
             </div>
           </div>
         </el-card>
@@ -135,6 +144,15 @@
                   :style="{ left: submitLoadingPosition.x + 'px', top: submitLoadingPosition.y + 'px' }"
                 />
                 <div class="loading-text">正在提交答案...</div>
+                <div class="progress-container">
+                  <el-progress 
+                    :percentage="submitProgress" 
+                    :stroke-width="6"
+                    :show-text="false"
+                    color="#DAA520"
+                  />
+                  <div class="progress-text">{{ submitProgress }}%</div>
+                </div>
               </div>
             </div>
           </div>
@@ -170,6 +188,12 @@ const currentLevel = ref(null)
 const selectedOptions = ref([])
 const draggedOption = ref(null)
 
+// 进度条相关
+const generateProgress = ref(0)
+const submitProgress = ref(0)
+let generateProgressInterval = null
+let submitProgressInterval = null
+
 // 加载图标随机移动相关
 const loadingPosition = ref({ x: 0, y: 0 })
 const submitLoadingPosition = ref({ x: 0, y: 0 })
@@ -177,10 +201,12 @@ let loadingInterval = null
 let submitLoadingInterval = null
 
 // 随机移动函数
-const getRandomPosition = (containerWidth = 300, containerHeight = 80, iconSize = 40) => {
+const getRandomPosition = (containerWidth = 300, containerHeight = 180, iconSize = 40) => {
+  // 限制图标在容器上半部分活动，避免与文案和进度条重叠
+  const maxY = Math.min(containerHeight - 120, 35) // 保留底部给文案和进度条
   return {
-    x: Math.random() * (containerWidth - iconSize),
-    y: Math.random() * (containerHeight - iconSize)
+    x: Math.random() * (containerWidth - iconSize - 10) + 5, // 左右留5px边距
+    y: Math.random() * maxY + 5 // 上方留5px边距
   }
 }
 
@@ -192,8 +218,8 @@ const startRandomMovement = (positionRef, intervalRef) => {
   
   // 根据屏幕大小调整容器尺寸
   const isMobile = window.innerWidth <= 768
-  const containerWidth = isMobile ? 210 : 260
-  const containerHeight = isMobile ? 30 : 40
+  const containerWidth = isMobile ? 250 : 300
+  const containerHeight = isMobile ? 160 : 180
   const iconSize = isMobile ? 35 : 40
   
   // 初始位置
@@ -210,6 +236,41 @@ const stopRandomMovement = (intervalRef) => {
   if (intervalRef) {
     clearInterval(intervalRef)
   }
+}
+
+// 进度条模拟逻辑
+const simulateProgress = (progressRef, type = 'generate') => {
+  progressRef.value = 0
+  let currentProgress = 0
+  
+  return setInterval(() => {
+    if (currentProgress < 30) {
+      // 前30%：快速增长（模拟初始化）
+      currentProgress += Math.random() * 8 + 3
+    } else if (currentProgress < 60) {
+      // 30%-60%：中等速度（模拟处理中）
+      currentProgress += Math.random() * 4 + 2
+    } else if (currentProgress < 85) {
+      // 60%-85%：较慢速度（模拟深度处理）
+      currentProgress += Math.random() * 2 + 1
+    } else if (currentProgress < 99) {
+      // 85%-99%：很慢速度（模拟最终处理）
+      currentProgress += Math.random() * 0.5 + 0.2
+    }
+    
+    // 确保不超过99%，最后1%由实际完成时设置
+    progressRef.value = Math.min(Math.floor(currentProgress), 99)
+  }, type === 'generate' ? 300 : 200) // 生成关卡稍慢，提交答案稍快
+}
+
+const stopProgress = (intervalRef) => {
+  if (intervalRef) {
+    clearInterval(intervalRef)
+  }
+}
+
+const completeProgress = (progressRef) => {
+  progressRef.value = 100
 }
 
 // 计算可用选项（排除已选择的）
@@ -259,16 +320,34 @@ const generateLevel = async () => {
   console.log('使用的薪资:', userSalary)
 
   generating.value = true
+  // 启动进度条模拟
+  generateProgressInterval = simulateProgress(generateProgress, 'generate')
+  
   try {
     const levelData = await generateLevelAPI({ salary: userSalary })
     currentLevel.value = levelData
     selectedOptions.value = []
-    ElMessage.success('关卡生成成功！')
+    
+    // 完成进度条
+    completeProgress(generateProgress)
+    
+    // 短暂延迟后显示成功消息，让用户看到100%
+    setTimeout(() => {
+      ElMessage.success('关卡生成成功！')
+    }, 200)
   } catch (error) {
     console.error('生成关卡失败:', error)
     ElMessage.error('生成关卡失败，请重试')
   } finally {
-    generating.value = false
+    // 清理进度条定时器
+    stopProgress(generateProgressInterval)
+    generateProgressInterval = null
+    
+    // 延迟重置状态，让用户看到完成效果
+    setTimeout(() => {
+      generating.value = false
+      generateProgress.value = 0
+    }, 500)
   }
 }
 
@@ -336,6 +415,9 @@ const submitAnswer = async () => {
   }
 
   submitting.value = true
+  // 启动进度条模拟
+  submitProgressInterval = simulateProgress(submitProgress, 'submit')
+  
   try {
     const submitData = {
       levelId: currentLevel.value.id,
@@ -351,15 +433,28 @@ const submitAnswer = async () => {
       userStore.updateUserSalary(newSalary)
     }
     
-    // 跳转到结果页面
-    console.log('准备跳转到结果页面:', `/result/${result.id}`)
-    router.push(`/result/${result.id}`)
+    // 完成进度条
+    completeProgress(submitProgress)
+    
+    // 短暂延迟后跳转，让用户看到100%
+    setTimeout(() => {
+      console.log('准备跳转到结果页面:', `/result/${result.id}`)
+      router.push(`/result/${result.id}`)
+    }, 300)
     
   } catch (error) {
     console.error('提交答案失败:', error)
     ElMessage.error('提交答案失败，请重试')
-  } finally {
-    submitting.value = false
+    
+    // 清理进度条定时器
+    stopProgress(submitProgressInterval)
+    submitProgressInterval = null
+    
+    // 重置状态
+    setTimeout(() => {
+      submitting.value = false
+      submitProgress.value = 0
+    }, 300)
   }
 }
 
@@ -376,6 +471,11 @@ watch(generating, (newVal) => {
   } else {
     stopRandomMovement(loadingInterval)
     loadingInterval = null
+    // 确保进度条定时器也被清理
+    if (generateProgressInterval) {
+      stopProgress(generateProgressInterval)
+      generateProgressInterval = null
+    }
   }
 })
 
@@ -386,6 +486,11 @@ watch(submitting, (newVal) => {
   } else {
     stopRandomMovement(submitLoadingInterval)
     submitLoadingInterval = null
+    // 确保进度条定时器也被清理
+    if (submitProgressInterval) {
+      stopProgress(submitProgressInterval)
+      submitProgressInterval = null
+    }
   }
 })
 
@@ -397,9 +502,11 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // 组件销毁时清理定时器
+  // 组件销毁时清理所有定时器
   stopRandomMovement(loadingInterval)
   stopRandomMovement(submitLoadingInterval)
+  stopProgress(generateProgressInterval)
+  stopProgress(submitProgressInterval)
 })
 </script>
 
@@ -605,7 +712,7 @@ onUnmounted(() => {
 .custom-loading-area {
   position: relative;
   width: 300px;
-  height: 80px;
+  height: 180px;
   margin: 20px auto;
   border: 2px dashed var(--border-medium);
   border-radius: 12px;
@@ -619,17 +726,46 @@ onUnmounted(() => {
   height: 40px;
   transition: all 0.3s ease-in-out;
   z-index: 2;
+  /* 限制图标活动范围，避免与文案和进度条重叠 */
+  top: 5px;
 }
 
 .loading-text {
   position: absolute;
-  bottom: 5px;
+  bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
+  z-index: 3;
+  background: var(--bg-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* 进度条容器 */
+.progress-container {
+  position: absolute;
+  bottom: 8px;
+  left: 20px;
+  right: 20px;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-container .el-progress {
+  flex: 1;
+}
+
+.progress-text {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 30px;
+  text-align: right;
 }
 
 .submit-loading {
@@ -656,12 +792,23 @@ onUnmounted(() => {
   
   .custom-loading-area {
     width: 250px;
-    height: 70px;
+    height: 80px;
   }
   
   .custom-loading-icon {
     width: 35px;
     height: 35px;
+  }
+  
+  .progress-container {
+    left: 15px;
+    right: 15px;
+    gap: 8px;
+  }
+  
+  .progress-text {
+    font-size: 11px;
+    min-width: 28px;
   }
 }
 </style>

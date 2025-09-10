@@ -142,6 +142,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { getUserLevelDetail } from '../api/userLevel'
 import { ElMessage } from 'element-plus'
+import MarkdownIt from 'markdown-it'
 import {
   KnifeFork,
   Clock,
@@ -156,6 +157,15 @@ import GlobalNavbar from '../components/GlobalNavbar.vue'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+
+// 初始化 Markdown 渲染器
+const md = new MarkdownIt({
+  html: false,        // 禁用 HTML 标签
+  xhtmlOut: false,    // 使用 HTML 标签而不是 XHTML
+  breaks: true,       // 自动换行
+  linkify: true,      // 自动识别链接
+  typographer: true   // 启用智能引号和其他印刷符号
+})
 
 const user = computed(() => userStore.user)
 const loading = ref(false)
@@ -176,20 +186,17 @@ const trueOptionsList = computed(() => {
   }
 })
 
-// 格式化标准答案（简单的 Markdown 转 HTML）
+// 格式化标准答案（使用 markdown-it 渲染）
 const formattedStandardAnswer = computed(() => {
   if (!resultData.value?.standardAnswer) return ''
   
-  let content = resultData.value.standardAnswer
-  
-  // 简单的 Markdown 转换
-  content = content
-    .replace(/\n/g, '<br>') // 换行
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // 粗体
-    .replace(/\*(.*?)\*/g, '<em>$1</em>') // 斜体
-    .replace(/`(.*?)`/g, '<code>$1</code>') // 行内代码
-  
-  return content
+  try {
+    return md.render(resultData.value.standardAnswer)
+  } catch (error) {
+    console.error('Markdown 渲染失败:', error)
+    // 如果渲染失败，回退到原始文本
+    return resultData.value.standardAnswer.replace(/\n/g, '<br>')
+  }
 })
 
 // 获取分数样式类
@@ -472,23 +479,160 @@ onMounted(() => {
 
 .markdown-content {
   font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-secondary);
 }
 
-.markdown-content strong {
-  color: #333;
-  font-weight: bold;
+/* 标题样式 */
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h3),
+.markdown-content :deep(h4),
+.markdown-content :deep(h5),
+.markdown-content :deep(h6) {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin: 20px 0 12px 0;
+  letter-spacing: 0.5px;
 }
 
-.markdown-content em {
+.markdown-content :deep(h1) { font-size: 24px; }
+.markdown-content :deep(h2) { font-size: 20px; }
+.markdown-content :deep(h3) { font-size: 18px; }
+.markdown-content :deep(h4) { font-size: 16px; }
+
+/* 段落样式 */
+.markdown-content :deep(p) {
+  margin: 12px 0;
+  line-height: 1.8;
+}
+
+/* 强调和斜体 */
+.markdown-content :deep(strong) {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.markdown-content :deep(em) {
   font-style: italic;
+  color: var(--text-primary);
 }
 
-.markdown-content code {
-  background-color: #f5f7fa;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  color: #e96900;
+/* 行内代码 */
+.markdown-content :deep(code) {
+  background: linear-gradient(135deg, var(--secondary-sand) 0%, #F0E68C 100%);
+  color: var(--secondary-brown);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--border-light);
+}
+
+/* 代码块 */
+.markdown-content :deep(pre) {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, #F5F1E8 100%);
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  overflow-x: auto;
+  box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.markdown-content :deep(pre code) {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+/* 列表样式 */
+.markdown-content :deep(ul),
+.markdown-content :deep(ol) {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.markdown-content :deep(li) {
+  margin: 6px 0;
+  line-height: 1.6;
+}
+
+.markdown-content :deep(ul li) {
+  list-style-type: none;
+  position: relative;
+}
+
+.markdown-content :deep(ul li::before) {
+  content: '◆';
+  color: var(--accent-gold);
+  font-size: 12px;
+  position: absolute;
+  left: -16px;
+}
+
+/* 引用块样式 */
+.markdown-content :deep(blockquote) {
+  border-left: 4px solid var(--accent-gold);
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--secondary-sand) 100%);
+  margin: 16px 0;
+  padding: 12px 20px;
+  border-radius: 0 8px 8px 0;
+  color: var(--text-secondary);
+  font-style: italic;
+  box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+/* 链接样式 */
+.markdown-content :deep(a) {
+  color: var(--accent-copper);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--accent-copper);
+  transition: all 0.3s ease;
+}
+
+.markdown-content :deep(a:hover) {
+  color: var(--accent-gold);
+  border-bottom-color: var(--accent-gold);
+}
+
+/* 分割线样式 */
+.markdown-content :deep(hr) {
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--border-medium) 50%, transparent 100%);
+  margin: 24px 0;
+}
+
+/* 表格样式 */
+.markdown-content :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  background: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.markdown-content :deep(th),
+.markdown-content :deep(td) {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.markdown-content :deep(th) {
+  background: linear-gradient(135deg, var(--primary-sand) 0%, var(--secondary-sand) 100%);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.markdown-content :deep(tr:hover) {
+  background: var(--bg-secondary);
 }
 
 .bottom-actions {
