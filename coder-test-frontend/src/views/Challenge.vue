@@ -13,12 +13,23 @@
             <el-button
               type="primary"
               size="large"
-              :loading="generating"
+              :disabled="generating"
               @click="generateLevel"
             >
               <el-icon><MagicStick /></el-icon>
               生成关卡
             </el-button>
+            
+            <!-- 自定义加载区域 -->
+            <div v-if="generating" class="custom-loading-area">
+              <img 
+                :src="loadingIcon" 
+                alt="生成中..." 
+                class="custom-loading-icon"
+                :style="{ left: loadingPosition.x + 'px', top: loadingPosition.y + 'px' }"
+              />
+              <div class="loading-text">正在生成关卡中...</div>
+            </div>
           </div>
         </el-card>
       </div>
@@ -94,24 +105,37 @@
             </div>
 
             <div class="submit-area">
-              <el-button
-                type="primary"
-                size="large"
-                :loading="submitting"
-                :disabled="selectedOptions.length === 0"
-                @click="submitAnswer"
-              >
-                <el-icon><Check /></el-icon>
-                提交答案
-              </el-button>
+              <div class="button-row">
+                <el-button
+                  type="primary"
+                  size="large"
+                  :disabled="submitting || selectedOptions.length === 0"
+                  @click="submitAnswer"
+                >
+                  <el-icon><Check /></el-icon>
+                  提交答案
+                </el-button>
+                
+                <el-button
+                  size="large"
+                  :disabled="submitting"
+                  @click="resetLevel"
+                >
+                  <el-icon><Refresh /></el-icon>
+                  重新生成
+                </el-button>
+              </div>
               
-              <el-button
-                size="large"
-                @click="resetLevel"
-              >
-                <el-icon><Refresh /></el-icon>
-                重新生成
-              </el-button>
+              <!-- 提交答案加载区域 -->
+              <div v-if="submitting" class="custom-loading-area submit-loading">
+                <img 
+                  :src="loadingIcon" 
+                  alt="提交中..." 
+                  class="custom-loading-icon"
+                  :style="{ left: submitLoadingPosition.x + 'px', top: submitLoadingPosition.y + 'px' }"
+                />
+                <div class="loading-text">正在提交答案...</div>
+              </div>
             </div>
           </div>
         </div>
@@ -121,7 +145,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { generateLevel as generateLevelAPI } from '../api/level'
@@ -134,6 +158,7 @@ import {
   Close
 } from '@element-plus/icons-vue'
 import GlobalNavbar from '../components/GlobalNavbar.vue'
+import loadingIcon from '../assets/loading.png'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -144,6 +169,48 @@ const submitting = ref(false)
 const currentLevel = ref(null)
 const selectedOptions = ref([])
 const draggedOption = ref(null)
+
+// 加载图标随机移动相关
+const loadingPosition = ref({ x: 0, y: 0 })
+const submitLoadingPosition = ref({ x: 0, y: 0 })
+let loadingInterval = null
+let submitLoadingInterval = null
+
+// 随机移动函数
+const getRandomPosition = (containerWidth = 300, containerHeight = 80, iconSize = 40) => {
+  return {
+    x: Math.random() * (containerWidth - iconSize),
+    y: Math.random() * (containerHeight - iconSize)
+  }
+}
+
+// 开始随机移动
+const startRandomMovement = (positionRef, intervalRef) => {
+  if (intervalRef) {
+    clearInterval(intervalRef)
+  }
+  
+  // 根据屏幕大小调整容器尺寸
+  const isMobile = window.innerWidth <= 768
+  const containerWidth = isMobile ? 210 : 260
+  const containerHeight = isMobile ? 30 : 40
+  const iconSize = isMobile ? 35 : 40
+  
+  // 初始位置
+  positionRef.value = getRandomPosition(containerWidth, containerHeight, iconSize)
+  
+  // 每800ms移动一次（稍微慢一点，更优雅）
+  return setInterval(() => {
+    positionRef.value = getRandomPosition(containerWidth, containerHeight, iconSize)
+  }, 800)
+}
+
+// 停止随机移动
+const stopRandomMovement = (intervalRef) => {
+  if (intervalRef) {
+    clearInterval(intervalRef)
+  }
+}
 
 // 计算可用选项（排除已选择的）
 const availableOptions = computed(() => {
@@ -302,11 +369,37 @@ const resetLevel = () => {
   selectedOptions.value = []
 }
 
+// 监听生成状态变化
+watch(generating, (newVal) => {
+  if (newVal) {
+    loadingInterval = startRandomMovement(loadingPosition, loadingInterval)
+  } else {
+    stopRandomMovement(loadingInterval)
+    loadingInterval = null
+  }
+})
+
+// 监听提交状态变化
+watch(submitting, (newVal) => {
+  if (newVal) {
+    submitLoadingInterval = startRandomMovement(submitLoadingPosition, submitLoadingInterval)
+  } else {
+    stopRandomMovement(submitLoadingInterval)
+    submitLoadingInterval = null
+  }
+})
+
 onMounted(() => {
   // 页面加载时检查用户登录状态
   if (!user.value) {
     router.push('/login')
   }
+})
+
+onUnmounted(() => {
+  // 组件销毁时清理定时器
+  stopRandomMovement(loadingInterval)
+  stopRandomMovement(submitLoadingInterval)
 })
 </script>
 
@@ -497,19 +590,55 @@ onMounted(() => {
 .submit-area {
   margin-top: 30px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.submit-area .button-row {
+  display: flex;
   gap: 15px;
   justify-content: center;
+  margin-bottom: 10px;
+}
+
+/* 自定义加载区域 */
+.custom-loading-area {
+  position: relative;
+  width: 300px;
+  height: 80px;
+  margin: 20px auto;
+  border: 2px dashed var(--border-medium);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.custom-loading-icon {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  transition: all 0.3s ease-in-out;
+  z-index: 2;
+}
+
+.loading-text {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1;
+}
+
+.submit-loading {
+  margin-top: 15px;
 }
 
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .user-info {
-    flex-direction: column;
-    gap: 10px;
+  .main-content {
+    padding: 30px 20px;
   }
   
   .answer-section {
@@ -520,8 +649,19 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
   
-  .submit-area {
+  .submit-area .button-row {
     flex-direction: column;
+    gap: 10px;
+  }
+  
+  .custom-loading-area {
+    width: 250px;
+    height: 70px;
+  }
+  
+  .custom-loading-icon {
+    width: 35px;
+    height: 35px;
   }
 }
 </style>
