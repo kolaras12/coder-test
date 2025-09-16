@@ -10,9 +10,13 @@ import com.yupi.codertestbackend.model.dto.user.UserLoginRequest;
 import com.yupi.codertestbackend.model.dto.user.UserRegisterRequest;
 import com.yupi.codertestbackend.model.entity.User;
 import com.yupi.codertestbackend.model.enums.UserRoleEnum;
+import com.yupi.codertestbackend.model.vo.UserRankingVO;
 import com.yupi.codertestbackend.model.vo.UserVO;
 import com.yupi.codertestbackend.service.UserService;
 import com.yupi.codertestbackend.utils.AvatarUtils;
+
+import java.util.List;
+import java.util.stream.IntStream;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -202,6 +206,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!isAdmin(user)) {
             throw new RuntimeException("无权限访问，仅限管理员");
         }
+    }
+
+    @Override
+    public List<UserRankingVO> getSalaryRanking(int limit) {
+        // 查询薪资排行榜，按薪资降序排列
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id", "nickname", "avatar", "salary")
+                   .orderByDesc("salary", "createTime")
+                   .last("LIMIT " + limit);
+        
+        List<User> users = this.list(queryWrapper);
+        
+        // 转换为排行榜VO并设置排名
+        return IntStream.range(0, users.size())
+                .mapToObj(i -> {
+                    User user = users.get(i);
+                    UserRankingVO rankingVO = new UserRankingVO();
+                    BeanUtils.copyProperties(user, rankingVO);
+                    rankingVO.setRank(i + 1);
+                    
+                    // 如果用户没有头像，设置默认头像
+                    if (StrUtil.isBlank(rankingVO.getAvatar())) {
+                        rankingVO.setAvatar(AvatarUtils.getDefaultAvatarByUserId(user.getId()));
+                    }
+                    
+                    return rankingVO;
+                })
+                .toList();
     }
 }
 

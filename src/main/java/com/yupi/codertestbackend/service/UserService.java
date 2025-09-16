@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.yupi.codertestbackend.model.dto.user.UserLoginRequest;
 import com.yupi.codertestbackend.model.dto.user.UserRegisterRequest;
 import com.yupi.codertestbackend.model.entity.User;
+import com.yupi.codertestbackend.model.vo.UserRankingVO;
 import com.yupi.codertestbackend.model.vo.UserVO;
+
+import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -77,5 +80,13 @@ public interface UserService extends IService<User> {
      * @throws RuntimeException 如果不是管理员则抛出异常
      */
     void checkAdminAuth(HttpServletRequest request);
+
+    /**
+     * 获取薪资排行榜
+     *
+     * @param limit 排行榜数量限制
+     * @return 排行榜列表
+     */
+    List<UserRankingVO> getSalaryRanking(int limit);
 }
 
