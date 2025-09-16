@@ -9,11 +9,35 @@
         <el-card class="generate-card">
           <div class="generate-content">
             <h2>准备开始新的挑战</h2>
-            <p>系统将根据你当前的薪资水平生成适合的技术关卡</p>
+            <p>选择你的学习方向，系统将根据你当前的薪资水平生成适合的技术关卡</p>
+            
+            <!-- 学习方向选择 -->
+            <div class="direction-selector">
+              <h3>选择学习方向</h3>
+              <el-select 
+                v-model="selectedDirection" 
+                placeholder="请选择学习方向"
+                size="large"
+                style="width: 300px; margin-bottom: 20px;"
+              >
+                <el-option 
+                  v-for="direction in directionOptions" 
+                  :key="direction.value" 
+                  :label="direction.label" 
+                  :value="direction.value"
+                >
+                  <span style="float: left">{{ direction.label }}</span>
+                  <span style="float: right; color: var(--text-muted); font-size: 13px">
+                    {{ direction.desc }}
+                  </span>
+                </el-option>
+              </el-select>
+            </div>
+            
             <el-button
               type="primary"
               size="large"
-              :disabled="generating"
+              :disabled="generating || !selectedDirection"
               @click="generateLevel"
             >
               <el-icon><MagicStick /></el-icon>
@@ -66,6 +90,13 @@
                 <div class="featured-header">
                   <h4 class="featured-title">{{ level.levelName }}</h4>
                   <div class="featured-tags">
+                    <el-tag 
+                      v-if="level.direction" 
+                      type="primary" 
+                      size="small"
+                    >
+                      {{ level.direction }}
+                    </el-tag>
                     <el-tag 
                       v-if="level.priority >= 9999" 
                       type="danger" 
@@ -127,6 +158,13 @@
           <div class="level-header">
             <h2 class="level-name">{{ currentLevel.levelName }}</h2>
             <div class="level-meta">
+              <el-tag 
+                v-if="currentLevel.direction" 
+                type="primary" 
+                size="large"
+              >
+                {{ currentLevel.direction }}
+              </el-tag>
               <el-tag :type="getDifficultyType(currentLevel.difficulty)">
                 {{ currentLevel.difficulty }}
               </el-tag>
@@ -273,6 +311,23 @@ const featuredCurrent = ref(1)
 const featuredPageSize = ref(6)
 const featuredTotal = ref(0)
 
+// 学习方向相关数据
+const selectedDirection = ref('')
+const directionOptions = [
+  { value: '全栈开发', label: '全栈开发', desc: '前后端通吃' },
+  { value: '前端开发', label: '前端开发', desc: 'Web界面开发' },
+  { value: 'Java后端开发', label: 'Java后端开发', desc: '企业级后端' },
+  { value: 'Python后端开发', label: 'Python后端开发', desc: '快速开发' },
+  { value: '软件测试', label: '软件测试', desc: '质量保障' },
+  { value: 'AI算法', label: 'AI算法', desc: '人工智能' },
+  { value: '网络运维', label: '网络运维', desc: '系统运维' },
+  { value: '数据分析', label: '数据分析', desc: '数据洞察' },
+  { value: '移动端开发', label: '移动端开发', desc: 'App开发' },
+  { value: 'DevOps运维', label: 'DevOps运维', desc: '自动化运维' },
+  { value: '网络安全', label: '网络安全', desc: '安全防护' },
+  { value: '游戏开发', label: '游戏开发', desc: '游戏制作' }
+]
+
 // 进度条相关
 const generateProgress = ref(0)
 const submitProgress = ref(0)
@@ -409,7 +464,11 @@ const generateLevel = async () => {
   generateProgressInterval = simulateProgress(generateProgress, 'generate')
   
   try {
-    const levelData = await generateLevelAPI({ salary: userSalary })
+    const requestData = { 
+      salary: userSalary,
+      direction: selectedDirection.value
+    }
+    const levelData = await generateLevelAPI(requestData)
     currentLevel.value = levelData
     selectedOptions.value = []
     
@@ -813,6 +872,17 @@ onUnmounted(() => {
   color: var(--text-secondary);
   line-height: 1.8;
   font-size: 16px;
+}
+
+.direction-selector {
+  margin-bottom: 30px;
+}
+
+.direction-selector h3 {
+  margin-bottom: 15px;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .level-section {

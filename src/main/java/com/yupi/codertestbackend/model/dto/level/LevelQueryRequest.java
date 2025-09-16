@@ -26,6 +26,11 @@ public class LevelQueryRequest implements Serializable {
     private Integer priority;
 
     /**
+     * 学习方向
+     */
+    private String direction;
+
+    /**
      * 当前页码
      */
     private long current = 1;

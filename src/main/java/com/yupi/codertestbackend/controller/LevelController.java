@@ -53,7 +53,12 @@ public class LevelController {
                 salary = user.getSalary();
             }
             
-            Level level = levelService.generateLevel(salary);
+            // 获取学习方向
+            String direction = generateLevelRequest.getDirection();
+            
+            // 生成关卡（如果没有指定方向，服务层会设置默认值）
+            Level level = levelService.generateLevel(salary, direction);
+            
             return ResultUtils.success(level);
         } catch (Exception e) {
             log.error("生成关卡失败", e);

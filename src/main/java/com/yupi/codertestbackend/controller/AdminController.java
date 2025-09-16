@@ -60,6 +60,9 @@ public class AdminController {
             if (queryRequest.getPriority() != null) {
                 queryWrapper.eq("priority", queryRequest.getPriority());
             }
+            if (StrUtil.isNotBlank(queryRequest.getDirection())) {
+                queryWrapper.eq("direction", queryRequest.getDirection());
+            }
 
             // 按优先级和创建时间排序
             queryWrapper.orderByDesc("priority", "createTime");

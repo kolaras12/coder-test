@@ -41,6 +41,27 @@
             </el-col>
             <el-col :span="6">
               <el-select 
+                v-model="queryParams.direction" 
+                placeholder="学习方向"
+                clearable
+                @change="handleSearch"
+              >
+                <el-option label="全栈开发" value="全栈开发" />
+                <el-option label="前端开发" value="前端开发" />
+                <el-option label="Java后端开发" value="Java后端开发" />
+                <el-option label="Python后端开发" value="Python后端开发" />
+                <el-option label="软件测试" value="软件测试" />
+                <el-option label="AI算法" value="AI算法" />
+                <el-option label="网络运维" value="网络运维" />
+                <el-option label="数据分析" value="数据分析" />
+                <el-option label="移动端开发" value="移动端开发" />
+                <el-option label="DevOps运维" value="DevOps运维" />
+                <el-option label="网络安全" value="网络安全" />
+                <el-option label="游戏开发" value="游戏开发" />
+              </el-select>
+            </el-col>
+            <el-col :span="6">
+              <el-select 
                 v-model="queryParams.priority" 
                 placeholder="优先级"
                 clearable
@@ -100,6 +121,13 @@
                 <el-tag v-if="row.priority >= 999" type="danger" size="small">精选</el-tag>
                 <el-tag v-else-if="row.priority >= 99" type="warning" size="small">推荐</el-tag>
               </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="direction" label="学习方向" width="120">
+            <template #default="{ row }">
+              <el-tag type="primary" size="small">
+                {{ row.direction || '全栈开发' }}
+              </el-tag>
             </template>
           </el-table-column>
           <el-table-column prop="difficulty" label="难度" width="100">
@@ -214,6 +242,22 @@
             placeholder="请输入JSON格式的关卡选项"
           />
         </el-form-item>
+        <el-form-item label="学习方向" prop="direction">
+          <el-select v-model="levelForm.direction" placeholder="请选择学习方向">
+            <el-option label="全栈开发" value="全栈开发" />
+            <el-option label="前端开发" value="前端开发" />
+            <el-option label="Java后端开发" value="Java后端开发" />
+            <el-option label="Python后端开发" value="Python后端开发" />
+            <el-option label="软件测试" value="软件测试" />
+            <el-option label="AI算法" value="AI算法" />
+            <el-option label="网络运维" value="网络运维" />
+            <el-option label="数据分析" value="数据分析" />
+            <el-option label="移动端开发" value="移动端开发" />
+            <el-option label="DevOps运维" value="DevOps运维" />
+            <el-option label="网络安全" value="网络安全" />
+            <el-option label="游戏开发" value="游戏开发" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="难度等级" prop="difficulty">
           <el-select v-model="levelForm.difficulty" placeholder="请选择难度等级">
             <el-option label="简单" value="简单" />
@@ -286,6 +330,7 @@ const levelFormRef = ref()
 const queryParams = reactive({
   levelName: '',
   difficulty: '',
+  direction: '',
   priority: null,
   current: 1,
   pageSize: 10
@@ -299,6 +344,7 @@ const levelForm = reactive({
   options: '',
   difficulty: '',
   targetSalary: 10000,
+  direction: '全栈开发',
   priority: 0
 })
 
@@ -381,6 +427,7 @@ const handleSearch = async () => {
 const handleReset = () => {
   queryParams.levelName = ''
   queryParams.difficulty = ''
+  queryParams.direction = ''
   queryParams.priority = null
   queryParams.current = 1
   handleSearch()
@@ -536,6 +583,7 @@ const resetForm = () => {
     options: '',
     difficulty: '',
     targetSalary: 10000,
+    direction: '全栈开发',
     priority: 0
   })
   if (levelFormRef.value) {

@@ -36,6 +36,7 @@ CREATE TABLE `level`
     `options`      TEXT         NOT NULL COMMENT '关卡选项（JSON格式存储）',
     `difficulty`   VARCHAR(200) NOT NULL COMMENT '难度等级（简单，中等，困难）',
     `targetSalary` INT      DEFAULT 10000 COMMENT '目标薪资范围（用于难度匹配）',
+    `direction`    VARCHAR(100) DEFAULT '全栈开发' COMMENT '学习方向（前端开发、Java后端开发、软件测试等）',
     `priority`     INT      DEFAULT 0 COMMENT '关卡优先级（0-普通，99-推荐，999-精选，9999-置顶）',
     `createTime`   DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updateTime`   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -43,6 +44,7 @@ CREATE TABLE `level`
     PRIMARY KEY (`id`),
     KEY            `idx_difficulty` (`difficulty`),
     KEY            `idx_targetSalary` (`targetSalary`),
+    KEY            `idx_direction` (`direction`),
     KEY            `idx_priority` (`priority`),
     KEY            `idx_createTime` (`createTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='关卡表';

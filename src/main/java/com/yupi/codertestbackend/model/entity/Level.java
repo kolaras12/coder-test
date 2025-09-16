@@ -45,6 +45,11 @@ public class Level implements Serializable {
     private Integer targetSalary;
 
     /**
+     * 学习方向（前端开发、Java后端开发、软件测试等）
+     */
+    private String direction;
+
+    /**
      * 关卡优先级（0-普通，99-推荐，999-精选，9999-置顶）
      */
     private Integer priority;

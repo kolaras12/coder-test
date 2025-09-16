@@ -10,12 +10,12 @@ import dev.langchain4j.service.UserMessage;
 public interface LevelGenerationAiService {
 
     /**
-     * 根据用户薪资生成关卡
+     * 根据拼接好的用户消息生成关卡
      * 
-     * @param salary 用户当前薪资
+     * @param userMessage 拼接好的用户消息内容（包含薪资和学习方向）
      * @return 生成的关卡信息
      */
     @SystemMessage(fromResource = "prompts/level-generation-system.txt")
-    @UserMessage("当前薪资：{{salary}}")
-    LevelGenerationResponse generateLevel(Integer salary);
+    @UserMessage("{{userMessage}}")
+    LevelGenerationResponse generateLevel(String userMessage);
 }
