@@ -35,6 +35,11 @@ public class User implements Serializable {
     private String nickname;
 
     /**
+     * 用户头像URL
+     */
+    private String avatar;
+
+    /**
      * 当前薪资（单位：元/月）
      */
     private Integer salary;

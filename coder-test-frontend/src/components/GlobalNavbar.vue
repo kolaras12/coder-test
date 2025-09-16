@@ -25,9 +25,18 @@
           </div>
           
           <el-dropdown>
-            <span class="user-name">
-              {{ user?.nickname || user?.username }}
-              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            <span class="user-info">
+              <el-avatar 
+                :src="user?.avatar" 
+                :size="32" 
+                class="user-avatar"
+              >
+                <el-icon><User /></el-icon>
+              </el-avatar>
+              <span class="user-name">
+                {{ user?.nickname || user?.username }}
+                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </span>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -62,7 +71,8 @@ import {
   KnifeFork, 
   Clock, 
   SwitchButton, 
-  Coin
+  Coin,
+  User
 } from '@element-plus/icons-vue'
 
 // Props
@@ -176,12 +186,11 @@ const handleLogout = async () => {
   color: var(--accent-gold);
 }
 
-.user-name {
+.user-info {
   cursor: pointer;
   display: flex;
   align-items: center;
-  color: var(--bg-card);
-  font-weight: 500;
+  gap: 12px;
   padding: 8px 16px;
   border-radius: 25px;
   background: rgba(255, 255, 255, 0.1);
@@ -189,9 +198,21 @@ const handleLogout = async () => {
   transition: all 0.3s ease;
 }
 
-.user-name:hover {
+.user-info:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
+}
+
+.user-avatar {
+  border: 2px solid var(--accent-gold);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.user-name {
+  display: flex;
+  align-items: center;
+  color: var(--bg-card);
+  font-weight: 500;
 }
 
 /* 响应式设计 */

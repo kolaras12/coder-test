@@ -15,6 +15,7 @@ CREATE TABLE `user`
     `username`   VARCHAR(50)  NOT NULL COMMENT '用户名',
     `password`   VARCHAR(255) NOT NULL COMMENT '密码（加密存储）',
     `nickname`   VARCHAR(50) DEFAULT NULL COMMENT '用户昵称',
+    `avatar`     VARCHAR(512) DEFAULT NULL COMMENT '用户头像URL',
     `salary`     INT         DEFAULT 10000 COMMENT '当前薪资（单位：元/月）',
     `createTime` DATETIME    DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updateTime` DATETIME    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

@@ -11,6 +11,7 @@ import com.yupi.codertestbackend.model.dto.user.UserRegisterRequest;
 import com.yupi.codertestbackend.model.entity.User;
 import com.yupi.codertestbackend.model.vo.UserVO;
 import com.yupi.codertestbackend.service.UserService;
+import com.yupi.codertestbackend.utils.AvatarUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -76,6 +77,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!saveResult) {
             throw new RuntimeException("注册失败，数据库错误");
         }
+        
+        // 注册成功后设置默认头像（基于用户ID生成固定头像）
+        user.setAvatar(AvatarUtils.getDefaultAvatarByUserId(user.getId()));
+        this.updateById(user);
+        
         return user.getId();
     }
 
@@ -140,6 +146,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
+        
+        // 如果用户没有头像，设置默认头像
+        if (StrUtil.isBlank(userVO.getAvatar())) {
+            userVO.setAvatar(AvatarUtils.getDefaultAvatarByUserId(user.getId()));
+        }
+        
         return userVO;
     }
 
