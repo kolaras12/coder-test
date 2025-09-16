@@ -41,6 +41,83 @@
             </div>
           </div>
         </el-card>
+
+        <!-- 精选关卡选择区域 -->
+        <el-card class="featured-levels-card">
+          <template #header>
+            <div class="card-header">
+              <h3>或选择精选关卡</h3>
+              <el-icon class="star-icon"><Star /></el-icon>
+            </div>
+          </template>
+          
+          <div v-loading="featuredLoading" class="featured-content">
+            <div v-if="featuredLevels.length === 0 && !featuredLoading" class="no-featured">
+              <el-empty description="暂无精选关卡" />
+            </div>
+            
+            <div v-else class="featured-grid">
+              <div
+                v-for="level in featuredLevels"
+                :key="level.id"
+                class="featured-item"
+                @click="selectFeaturedLevel(level)"
+              >
+                <div class="featured-header">
+                  <h4 class="featured-title">{{ level.levelName }}</h4>
+                  <div class="featured-tags">
+                    <el-tag 
+                      v-if="level.priority >= 9999" 
+                      type="danger" 
+                      size="small"
+                    >
+                      置顶
+                    </el-tag>
+                    <el-tag 
+                      v-else-if="level.priority >= 999" 
+                      type="warning" 
+                      size="small"
+                    >
+                      精选
+                    </el-tag>
+                    <el-tag 
+                      :type="getDifficultyType(level.difficulty)" 
+                      size="small"
+                    >
+                      {{ level.difficulty }}
+                    </el-tag>
+                  </div>
+                </div>
+                
+                <div class="featured-desc">
+                  {{ truncateText(level.levelDesc, 80) }}
+                </div>
+                
+                <div class="featured-meta">
+                  <span class="target-salary">
+                    ¥{{ level.targetSalary?.toLocaleString() || 0 }}/月
+                  </span>
+                  <span class="create-time">
+                    {{ formatTime(level.createTime) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 分页 -->
+            <div v-if="featuredTotal > 0" class="featured-pagination">
+              <el-pagination
+                v-model:current-page="featuredCurrent"
+                v-model:page-size="featuredPageSize"
+                :total="featuredTotal"
+                :page-sizes="[6, 12, 18]"
+                layout="prev, pager, next, sizes"
+                @current-change="loadFeaturedLevels"
+                @size-change="loadFeaturedLevels"
+              />
+            </div>
+          </div>
+        </el-card>
       </div>
 
       <!-- 关卡内容区域 -->
@@ -166,14 +243,15 @@
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-import { generateLevel as generateLevelAPI } from '../api/level'
+import { generateLevel as generateLevelAPI, getFeaturedLevels } from '../api/level'
 import { submitAnswer as submitAnswerAPI } from '../api/userLevel'
 import { ElMessage } from 'element-plus'
 import {
   MagicStick,
   Check,
   Refresh,
-  Close
+  Close,
+  Star
 } from '@element-plus/icons-vue'
 import GlobalNavbar from '../components/GlobalNavbar.vue'
 import loadingIcon from '../assets/loading.png'
@@ -187,6 +265,13 @@ const submitting = ref(false)
 const currentLevel = ref(null)
 const selectedOptions = ref([])
 const draggedOption = ref(null)
+
+// 精选关卡相关数据
+const featuredLevels = ref([])
+const featuredLoading = ref(false)
+const featuredCurrent = ref(1)
+const featuredPageSize = ref(6)
+const featuredTotal = ref(0)
 
 // 进度条相关
 const generateProgress = ref(0)
@@ -464,6 +549,41 @@ const resetLevel = () => {
   selectedOptions.value = []
 }
 
+// 加载精选关卡列表
+const loadFeaturedLevels = async () => {
+  featuredLoading.value = true
+  try {
+    const response = await getFeaturedLevels(featuredCurrent.value, featuredPageSize.value)
+    featuredLevels.value = response.records || []
+    featuredTotal.value = response.total || 0
+  } catch (error) {
+    console.error('获取精选关卡失败:', error)
+    ElMessage.error('获取精选关卡失败')
+  } finally {
+    featuredLoading.value = false
+  }
+}
+
+// 选择精选关卡
+const selectFeaturedLevel = (level) => {
+  currentLevel.value = level
+  selectedOptions.value = []
+  ElMessage.success(`已选择关卡：${level.levelName}`)
+}
+
+// 文本截断
+const truncateText = (text, maxLength) => {
+  if (!text) return ''
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength) + '...'
+}
+
+// 格式化时间
+const formatTime = (time) => {
+  if (!time) return ''
+  return new Date(time).toLocaleDateString('zh-CN')
+}
+
 // 监听生成状态变化
 watch(generating, (newVal) => {
   if (newVal) {
@@ -498,6 +618,9 @@ onMounted(() => {
   // 页面加载时检查用户登录状态
   if (!user.value) {
     router.push('/login')
+  } else {
+    // 加载精选关卡列表
+    loadFeaturedLevels()
   }
 })
 
@@ -527,7 +650,8 @@ onUnmounted(() => {
 
 .generate-section {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 30px;
   align-items: center;
   min-height: 400px;
 }
@@ -535,6 +659,140 @@ onUnmounted(() => {
 .generate-card {
   max-width: 500px;
   width: 100%;
+}
+
+.featured-levels-card {
+  width: 100%;
+  max-width: 1200px;
+  box-shadow: 0 8px 32px var(--shadow-heavy);
+  border-radius: 20px;
+  border: 1px solid var(--border-light);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: var(--primary-brown);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.star-icon {
+  font-size: 24px;
+  color: var(--accent-gold);
+}
+
+.featured-content {
+  min-height: 200px;
+}
+
+.no-featured {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.featured-item {
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-gold) 0%, var(--accent-copper) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.featured-item:hover {
+  border-color: var(--accent-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--shadow-medium);
+}
+
+.featured-item:hover::before {
+  opacity: 1;
+}
+
+.featured-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+
+.featured-title {
+  margin: 0;
+  color: var(--primary-brown);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.featured-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.featured-desc {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  min-height: 42px;
+}
+
+.featured-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.target-salary {
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.create-time {
+  color: var(--text-muted);
+}
+
+.featured-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
 }
 
 .generate-content {
@@ -809,6 +1067,24 @@ onUnmounted(() => {
   .progress-text {
     font-size: 11px;
     min-width: 28px;
+  }
+  
+  .featured-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .featured-item {
+    padding: 15px;
+  }
+  
+  .featured-title {
+    font-size: 15px;
+  }
+  
+  .featured-desc {
+    font-size: 13px;
+    min-height: 36px;
   }
 }
 </style>

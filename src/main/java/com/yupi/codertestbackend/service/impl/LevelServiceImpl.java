@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yupi.codertestbackend.mapper.LevelMapper;
 import com.yupi.codertestbackend.model.dto.ai.LevelGenerationResponse;
 import com.yupi.codertestbackend.model.entity.Level;
+import com.yupi.codertestbackend.model.enums.LevelPriorityEnum;
 import com.yupi.codertestbackend.service.LevelService;
 import com.yupi.codertestbackend.service.ai.LevelGenerationAiService;
 import jakarta.annotation.Resource;
@@ -36,6 +37,7 @@ public class LevelServiceImpl extends ServiceImpl<LevelMapper, Level> implements
             level.setOptions(JSONUtil.toJsonStr(aiResponse.getOptions())); // 将选项列表转换为JSON字符串
             level.setDifficulty(aiResponse.getDifficulty());
             level.setTargetSalary(aiResponse.getTargetSalary());
+            level.setPriority(LevelPriorityEnum.NORMAL.getValue()); // 默认优先级为普通
             
             // 保存到数据库
             boolean saveResult = this.save(level);
@@ -68,6 +70,7 @@ public class LevelServiceImpl extends ServiceImpl<LevelMapper, Level> implements
         level.setOptions("[]"); // 空选项
         level.setDifficulty(getDifficultyBySalary(salary));
         level.setTargetSalary(salary);
+        level.setPriority(LevelPriorityEnum.NORMAL.getValue()); // 默认优先级为普通
         return level;
     }
     

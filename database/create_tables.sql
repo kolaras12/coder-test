@@ -16,13 +16,15 @@ CREATE TABLE `user`
     `password`   VARCHAR(255) NOT NULL COMMENT '密码（加密存储）',
     `nickname`   VARCHAR(50) DEFAULT NULL COMMENT '用户昵称',
     `avatar`     VARCHAR(512) DEFAULT NULL COMMENT '用户头像URL',
+    `userRole`   VARCHAR(20) DEFAULT 'user' COMMENT '用户角色（user/admin）',
     `salary`     INT         DEFAULT 10000 COMMENT '当前薪资（单位：元/月）',
     `createTime` DATETIME    DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updateTime` DATETIME    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `isDelete`   TINYINT     DEFAULT 0 COMMENT '逻辑删除（0-未删除，1-已删除）',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_username` (`username`),
-    KEY          `idx_createTime` (`createTime`)
+    KEY          `idx_createTime` (`createTime`),
+    KEY          `idx_userRole` (`userRole`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
 
 -- 关卡表
@@ -34,12 +36,14 @@ CREATE TABLE `level`
     `options`      TEXT         NOT NULL COMMENT '关卡选项（JSON格式存储）',
     `difficulty`   VARCHAR(200) NOT NULL COMMENT '难度等级（简单，中等，困难）',
     `targetSalary` INT      DEFAULT 10000 COMMENT '目标薪资范围（用于难度匹配）',
+    `priority`     INT      DEFAULT 0 COMMENT '关卡优先级（0-普通，99-推荐，999-精选，9999-置顶）',
     `createTime`   DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updateTime`   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `isDelete`     TINYINT  DEFAULT 0 COMMENT '逻辑删除（0-未删除，1-已删除）',
     PRIMARY KEY (`id`),
     KEY            `idx_difficulty` (`difficulty`),
     KEY            `idx_targetSalary` (`targetSalary`),
+    KEY            `idx_priority` (`priority`),
     KEY            `idx_createTime` (`createTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='关卡表';
 

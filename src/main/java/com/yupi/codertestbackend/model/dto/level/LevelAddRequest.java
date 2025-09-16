@@ -1,23 +1,14 @@
-package com.yupi.codertestbackend.model.entity;
+package com.yupi.codertestbackend.model.dto.level;
 
-import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
- * 关卡表
- * @TableName level
+ * 关卡添加请求
  */
-@TableName(value = "level")
 @Data
-public class Level implements Serializable {
-    /**
-     * 主键
-     */
-    @TableId(type = IdType.ASSIGN_ID)
-    private String id;
+public class LevelAddRequest implements Serializable {
 
     /**
      * 关卡名称
@@ -49,23 +40,5 @@ public class Level implements Serializable {
      */
     private Integer priority;
 
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
-
-    /**
-     * 逻辑删除（0-未删除，1-已删除）
-     */
-    @TableLogic
-    private Integer isDelete;
-
-    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }
-

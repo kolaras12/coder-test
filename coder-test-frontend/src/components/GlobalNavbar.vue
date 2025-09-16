@@ -48,6 +48,14 @@
                   <el-icon><Clock /></el-icon>
                   闯关历史
                 </el-dropdown-item>
+                <el-dropdown-item 
+                  v-if="isAdmin" 
+                  @click="$router.push('/admin')"
+                  divided
+                >
+                  <el-icon><Setting /></el-icon>
+                  管理后台
+                </el-dropdown-item>
                 <el-dropdown-item divided @click="handleLogout">
                   <el-icon><SwitchButton /></el-icon>
                   退出登录
@@ -72,7 +80,8 @@ import {
   Clock, 
   SwitchButton, 
   Coin,
-  User
+  User,
+  Setting
 } from '@element-plus/icons-vue'
 
 // Props
@@ -88,6 +97,7 @@ const userStore = useUserStore()
 
 const isLoggedIn = computed(() => userStore.isLoggedIn)
 const user = computed(() => userStore.user)
+const isAdmin = computed(() => user.value?.userRole === 'admin')
 
 const handleLogoClick = () => {
   router.push('/')

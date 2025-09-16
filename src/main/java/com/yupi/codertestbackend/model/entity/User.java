@@ -40,6 +40,11 @@ public class User implements Serializable {
     private String avatar;
 
     /**
+     * 用户角色（user/admin）
+     */
+    private String userRole;
+
+    /**
      * 当前薪资（单位：元/月）
      */
     private Integer salary;

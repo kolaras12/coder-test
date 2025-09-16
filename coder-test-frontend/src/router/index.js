@@ -38,6 +38,12 @@ const routes = [
     name: 'Result',
     component: () => import('../views/Result.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('../views/Admin.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]
 
@@ -64,6 +70,15 @@ router.beforeEach(async (to, from, next) => {
       if (!userStore.isLoggedIn) {
         console.log('路由守卫 - 用户未登录，跳转到登录页')
         next('/login')
+        return
+      }
+    }
+
+    // 检查管理员权限
+    if (to.meta.requiresAdmin) {
+      if (!userStore.user || userStore.user.userRole !== 'admin') {
+        console.log('路由守卫 - 无管理员权限')
+        next('/')
         return
       }
     }

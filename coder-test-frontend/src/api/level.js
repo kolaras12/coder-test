@@ -9,3 +9,10 @@ export const generateLevel = (data) => {
 export const getLevelDetail = (id) => {
   return request.get(`/level/${id}`)
 }
+
+// 分页获取精选关卡列表
+export const getFeaturedLevels = (current = 1, pageSize = 10) => {
+  return request.get('/level/featured', {
+    params: { current, pageSize }
+  })
+}

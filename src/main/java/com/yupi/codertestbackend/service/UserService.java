@@ -61,5 +61,21 @@ public interface UserService extends IService<User> {
      * @return 是否成功
      */
     boolean updateUserSalary(String userId, int salaryChange);
+
+    /**
+     * 判断用户是否为管理员
+     *
+     * @param user 用户信息
+     * @return 是否为管理员
+     */
+    boolean isAdmin(User user);
+
+    /**
+     * 校验管理员权限
+     *
+     * @param request 请求对象
+     * @throws RuntimeException 如果不是管理员则抛出异常
+     */
+    void checkAdminAuth(HttpServletRequest request);
 }
 
