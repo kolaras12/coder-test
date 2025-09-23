@@ -119,7 +119,9 @@
             </template>
             
             <div class="analysis-content">
-              <div class="markdown-content" v-html="formattedStandardAnswer"></div>
+              <div class="markdown-content">
+                <Viewer :value="standardAnswerContent" :plugins="plugins" />
+              </div>
             </div>
           </el-card>
         </div>
@@ -142,7 +144,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { getUserLevelDetail } from '../api/userLevel'
 import { ElMessage } from 'element-plus'
-import MarkdownIt from 'markdown-it'
+import { Viewer } from '@bytemd/vue-next'
+import gfm from '@bytemd/plugin-gfm'
+import mermaid from '@bytemd/plugin-mermaid'
 import {
   KnifeFork,
   Clock,
@@ -154,18 +158,18 @@ import {
 } from '@element-plus/icons-vue'
 import GlobalNavbar from '../components/GlobalNavbar.vue'
 
+// 导入 ByteMD 样式
+import 'bytemd/dist/index.css'
+
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-// 初始化 Markdown 渲染器
-const md = new MarkdownIt({
-  html: false,        // 禁用 HTML 标签
-  xhtmlOut: false,    // 使用 HTML 标签而不是 XHTML
-  breaks: true,       // 自动换行
-  linkify: true,      // 自动识别链接
-  typographer: true   // 启用智能引号和其他印刷符号
-})
+// 配置 ByteMD 插件
+const plugins = [
+  gfm(),
+  mermaid()
+]
 
 const user = computed(() => userStore.user)
 const loading = ref(false)
@@ -186,17 +190,9 @@ const trueOptionsList = computed(() => {
   }
 })
 
-// 格式化标准答案（使用 markdown-it 渲染）
-const formattedStandardAnswer = computed(() => {
-  if (!resultData.value?.standardAnswer) return ''
-  
-  try {
-    return md.render(resultData.value.standardAnswer)
-  } catch (error) {
-    console.error('Markdown 渲染失败:', error)
-    // 如果渲染失败，回退到原始文本
-    return resultData.value.standardAnswer.replace(/\n/g, '<br>')
-  }
+// 获取标准答案内容
+const standardAnswerContent = computed(() => {
+  return resultData.value?.standardAnswer || ''
 })
 
 // 获取分数样式类
@@ -481,6 +477,29 @@ onMounted(() => {
   font-size: 15px;
   line-height: 1.8;
   color: var(--text-secondary);
+}
+
+/* ByteMD Viewer 样式覆盖 */
+.markdown-content :deep(.bytemd-viewer) {
+  background: transparent;
+  font-family: inherit;
+}
+
+/* Mermaid 图表样式 */
+.markdown-content :deep(.mermaid) {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.markdown-content :deep(.mermaid svg) {
+  max-width: 100%;
+  height: auto;
 }
 
 /* 标题样式 */
