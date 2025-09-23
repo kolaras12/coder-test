@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 // 创建axios实例
 const request = axios.create({
   baseURL: '/api',
-  timeout: 60000,
+  timeout: 300000,
   withCredentials: true // 携带cookie
 })
 

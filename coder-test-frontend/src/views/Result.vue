@@ -126,6 +126,38 @@
           </el-card>
         </div>
 
+        <!-- 面试题推荐 -->
+        <div v-if="recommendedQuestionsContent" class="interview-questions-section">
+          <el-card>
+            <template #header>
+              <div class="section-title">
+                <el-icon><QuestionFilled /></el-icon>
+                相关面试题推荐
+              </div>
+            </template>
+            
+            <div class="interview-questions-content">
+              <div class="markdown-content">
+                <Viewer :value="recommendedQuestionsContent" :plugins="plugins" />
+              </div>
+              
+              <div class="questions-footer">
+                <el-alert
+                  title="💡 提示"
+                  type="info"
+                  :closable="false"
+                  show-icon
+                >
+                  <template #default>
+                    以上面试题来自 <a href="https://www.mianshiya.com" target="_blank" class="mianshiya-link">面试鸭</a>，
+                    建议结合本次关卡的知识点进行针对性练习，提升面试通过率！
+                  </template>
+                </el-alert>
+              </div>
+            </div>
+          </el-card>
+        </div>
+
         <!-- 底部操作 -->
         <div class="bottom-actions">
           <el-button size="large" @click="$router.push('/')" class="home-btn">
@@ -154,7 +186,8 @@ import {
   Document,
   Check,
   Reading,
-  House
+  House,
+  QuestionFilled
 } from '@element-plus/icons-vue'
 import GlobalNavbar from '../components/GlobalNavbar.vue'
 
@@ -195,6 +228,11 @@ const standardAnswerContent = computed(() => {
   return resultData.value?.standardAnswer || ''
 })
 
+// 获取推荐面试题内容
+const recommendedQuestionsContent = computed(() => {
+  return resultData.value?.recommendedQuestions || ''
+})
+
 // 获取分数样式类
 const getScoreClass = (score) => {
   if (score >= 80) return 'excellent'
@@ -208,6 +246,7 @@ const getSalaryChangeClass = (change) => {
   if (change < 0) return 'salary-decrease'
   return 'salary-neutral'
 }
+
 
 // 获取结果详情
 const fetchResultDetail = async () => {
@@ -671,6 +710,32 @@ onMounted(() => {
 
 .home-btn:hover {
   transform: translateY(-2px) !important;
+}
+
+/* 面试题推荐区域样式 */
+.interview-questions-section {
+  margin-top: 35px;
+}
+
+.interview-questions-content {
+  padding: 10px 0;
+}
+
+.questions-footer {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+}
+
+.mianshiya-link {
+  color: var(--accent-copper);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.mianshiya-link:hover {
+  color: var(--accent-gold);
 }
 
 @media (max-width: 768px) {

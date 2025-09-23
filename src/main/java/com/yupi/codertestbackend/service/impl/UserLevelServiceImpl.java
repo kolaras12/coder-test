@@ -102,6 +102,7 @@ public class UserLevelServiceImpl extends ServiceImpl<UserLevelMapper, UserLevel
             userLevel.setReason(aiResponse.getReason());
             userLevel.setTrueOptions(JSONUtil.toJsonStr(aiResponse.getTrueOptions()));
             userLevel.setStandardAnswer(aiResponse.getStandardAnswer());
+            userLevel.setRecommendedQuestions(aiResponse.getRecommendedQuestions());
 
             // 4. 保存结果
             boolean saveResult = this.save(userLevel);

@@ -87,6 +87,12 @@
             <artifactId>langchain4j-reactor</artifactId>
             <version>1.4.0-beta10</version>
         </dependency>
+        <!-- Jsoup for web scraping -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.17.2</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>

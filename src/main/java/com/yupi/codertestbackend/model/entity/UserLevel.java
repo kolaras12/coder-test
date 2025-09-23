@@ -70,6 +70,11 @@ public class UserLevel implements Serializable {
     private String standardAnswer;
 
     /**
+     * 推荐面试题
+     */
+    private String recommendedQuestions;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

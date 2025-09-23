@@ -1,10 +1,12 @@
 package com.yupi.codertestbackend.config;
 
+import com.yupi.codertestbackend.service.ai.InterviewQuestionSearchTool;
 import com.yupi.codertestbackend.service.ai.LevelGenerationAiService;
 import com.yupi.codertestbackend.service.ai.ResultReportAiService;
 import dev.langchain4j.community.model.dashscope.QwenChatModel;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +25,9 @@ public class AiConfig {
 
     @Value("${langchain4j.dashscope.temperature:0.7}")
     private Float temperature;
+    
+    @Resource
+    private InterviewQuestionSearchTool interviewQuestionSearchTool;
 
     /**
      * 配置 ChatModel Bean
@@ -53,6 +58,7 @@ public class AiConfig {
     public ResultReportAiService resultReportAiService(ChatModel chatModel) {
         return AiServices.builder(ResultReportAiService.class)
                 .chatModel(chatModel)
+                .tools(interviewQuestionSearchTool)
                 .build();
     }
 }

@@ -44,4 +44,9 @@ public class ResultReportResponse {
      * 标准的、详细的关卡分析和解读
      */
     private String standardAnswer;
+    
+    /**
+     * 推荐的面试题列表
+     */
+    private String recommendedQuestions;
 }
